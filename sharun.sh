@@ -19,7 +19,7 @@ cd "${APPDIR}"
 cp -v /usr/share/applications/org.eden_emu.eden.desktop ./eden.desktop
 cp -v /usr/share/icons/hicolor/scalable/apps/org.eden_emu.eden.svg ./eden.svg
 ln -sfv ./eden.svg ./.DirIcon
-    
+
 wget --retry-connrefused --tries=30 "$LIB4BN" -O ./lib4bin
 chmod +x ./lib4bin
 xvfb-run -a -- ./lib4bin -p -v -e -s -k \
