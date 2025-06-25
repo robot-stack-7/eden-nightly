@@ -10,6 +10,11 @@ fi
 cd ./eden
 git submodule update --init --recursive
 
+# workaround for prebuilt ffmpeg download failure
+# use prebuilt ffmpeg from https://git.eden-emu.dev/eden-emu/ext-android-bin
+# content unchanged
+sed -i 's|set(package_base_url "https://git.eden-emu.dev/eden-emu/")|set(package_base_url "https://github.com/pflyly/eden-nightly/")|' CMakeModules/DownloadExternals.cmake
+sed -i 's|set(package_repo "ext-android-bin/raw/master/")|set(package_repo "raw/refs/heads/main/")|' CMakeModules/DownloadExternals.cmake
 
 if [ "$TARGET" = "Coexist" ]; then
     # Change the App name and application ID to make it coexist with official build
