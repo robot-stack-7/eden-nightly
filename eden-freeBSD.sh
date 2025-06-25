@@ -96,8 +96,26 @@ cp -v src/yuzu/*.qm "${PKG_DIR}/share/translations/"
 strip "${PKG_DIR}/bin/eden"
 find "${PKG_DIR}/lib" -type f -name '*.so*' -exec strip {} \;
 
+# Create a laucher for the pack
+cat > "${PKG_NAME}/launch.sh" <<EOF
+#!/bin/sh
+# Eden Launcher for FreeBSD
+
+DIR=\$(dirname "\$0")/usr/local
+
+# Setup libs environment
+export LD_LIBRARY_PATH="\$DIR/lib:\$DIR/lib/qt6:\$LD_LIBRARY_PATH"
+export QT_PLUGIN_PATH="\$DIR/lib/qt6/plugins"
+export QT_QPA_PLATFORM_PLUGIN_PATH="\$QT_PLUGIN_PATH/platforms"
+export QT_TRANSLATIONS_PATH="\$DIR/share/translations"
+
+exec "\$DIR/bin/eden" "\$@"
+EOF
+
+chmod +x "${PKG_NAME}/launch.sh"
+
 # Pack for upload
-XZ_OPT="-9e -T0" tar -caf "${PKG_NAME}.tar.xz" "${PKG_NAME}"
+XZ_OPT="-9e -T0" tar -cavf "${PKG_NAME}.tar.xz" "${PKG_NAME}"
 mkdir -p artifacts
 mv -v "${PKG_NAME}.tar.xz" artifacts
 

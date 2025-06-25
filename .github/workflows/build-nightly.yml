@@ -85,7 +85,7 @@ jobs:
         uses: actions/cache@v4.2.3
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-ccache-${{ matrix.target }}-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-ccache-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-ccache-${{ matrix.target }}-
             
@@ -234,7 +234,7 @@ jobs:
           - target: x86_64
             runs-on: macos-13
           - target: arm64
-            runs-on: macos-15
+            runs-on: macos-14
     continue-on-error: true
     env:
       TARGET: ${{ matrix.target }}
@@ -248,7 +248,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-${{ matrix.target }}-ccache-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-${{ matrix.target }}-ccache-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.target }}-ccache-
             
@@ -280,13 +280,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: FreeBSD-ccache-${{ hashFiles('vcpkg.json') }}
+          key: FreeBSD-ccache-${{ github.sha }}
           restore-keys: FreeBSD-ccache-
 
       - name: Pull Eden with submodules
         run: |
-          git clone https://github.com/pflyly/eden-mirror.git eden
-          cd eden
+          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+            echo "Using mirror instead..."
+            rm -rf ./eden || true
+            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
+          fi
+          cd ./eden
           git submodule update --init --recursive $(awk '/path/ && !/vcpkg/ && !/libusb/ { print $3 }' .gitmodules)
           
       - name: Compile Eden FreeBSD
