@@ -79,6 +79,7 @@ pacman -Syu --noconfirm \
 	vulkan-nouveau \
 	vulkan-radeon \
 	wget \
+ 	wireless_tools \
 	x264 \
 	x265 \
 	xcb-util-image \
