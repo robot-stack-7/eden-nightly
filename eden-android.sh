@@ -23,6 +23,12 @@ if [ "$TARGET" = "Coexist" ]; then
     sed -i 's|<string name="app_name"[^>]*>.*</string>|<string name="app_name" translatable="false">Eden Unofficial</string>|' src/android/app/src/main/res/values/strings.xml
 fi        
 
+if [ "$TARGET" = "Optimised" ]; then
+    # Add optimised to the app name
+    sed -i 's/resValue("string", "app_name_suffixed", "eden")/resValue("string", "app_name_suffixed", "eden optimised")/' src/android/app/build.gradle.kts
+    sed -i 's|<string name="app_name"[^>]*>.*</string>|<string name="app_name" translatable="false">Eden Optimised</string>|' src/android/app/src/main/res/values/strings.xml
+fi 
+
 COUNT="$(git rev-list --count HEAD)"
 APK_NAME="Eden-${COUNT}-Android-Unofficial-${TARGET}"
 
@@ -31,7 +37,7 @@ chmod +x ./gradlew
 if [ "$TARGET" = "Optimised" ]; then
 	./gradlew assembleGenshinSpoofRelease --console=plain --info -Dorg.gradle.caching=true
 else
-	./gradlew assembleRelease --console=plain --info -Dorg.gradle.caching=true
+	./gradlew assembleMainlineRelease --console=plain --info -Dorg.gradle.caching=true
 fi
 
 APK_PATH=$(find app/build/outputs/apk -type f -name "*.apk" | head -n 1)
