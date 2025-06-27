@@ -20,6 +20,9 @@ sed -i '' '/#elif defined(__APPLE__)/i\
 # workaound for ffmpeg
 sed -i '' 's/make -j\${SYSTEM_THREADS}/gmake -j\${SYSTEM_THREADS}/' externals/ffmpeg/CMakeLists.txt
 
+# workaround for airplane mode commit: resolve non existed libiw linking
+sed -i '' 's/^if *(UNIX AND NOT APPLE AND NOT ANDROID)/if(CMAKE_SYSTEM_NAME STREQUAL "Linux")/' src/core/CMakeLists.txt
+
 mkdir build
 cd build
 cmake .. -GNinja \
