@@ -382,6 +382,7 @@ jobs:
       - uses: actions/download-artifact@v4.3.0
         with:
            name: eden-windows-msvc-x86_arm64
+        continue-on-error: true
         
       - uses: actions/download-artifact@v4.3.0
         with:
@@ -394,7 +395,6 @@ jobs:
       - uses: actions/download-artifact@v4.3.0
         with:
            name: eden-freebsd
-        continue-on-error: true
         
       - uses: actions/download-artifact@v4.3.0
         with:
