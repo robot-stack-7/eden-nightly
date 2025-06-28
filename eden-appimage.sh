@@ -41,6 +41,7 @@ case "$1" in
         echo "Making Eden Optimized Build for AArch64"
         CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -w"
         CMAKE_C_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -w"
+	CCACHE="sccache"	
         TARGET="Linux"
         ;;
 esac
@@ -92,6 +93,8 @@ ninja
 
 if [ "$1" != 'aarch64' ]; then
     ccache -s -v
+else
+    sccache --show-stats
 fi
 
 cd ../..
