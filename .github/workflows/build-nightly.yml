@@ -62,6 +62,8 @@ jobs:
         include:
           - target: steamdeck
             runs-on: ubuntu-latest
+          - target: rog
+            runs-on: ubuntu-latest
           - target: common
             runs-on: ubuntu-latest
           - target: legacy
@@ -334,7 +336,19 @@ jobs:
            
       - uses: actions/download-artifact@v4.3.0
         with:
-           name: eden-steamdeck-light-appimage 
+           name: eden-steamdeck-light-appimage
+           
+      - uses: actions/download-artifact@v4.3.0
+        with:
+           name: eden-rog-mesa-appimage
+           
+      - uses: actions/download-artifact@v4.3.0
+        with:
+           name: eden-rog-mesa-appbundle
+           
+      - uses: actions/download-artifact@v4.3.0
+        with:
+           name: eden-rog-light-appimage
            
       - uses: actions/download-artifact@v4.3.0
         with:
