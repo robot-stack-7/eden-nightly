@@ -2,15 +2,7 @@
 
 echo "Making Eden for Windows (MSVC)"
 
-# Clone Eden, fallback to mirror if upstream repo fails to clone
-if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-	echo "Using mirror instead..."
-	rm -rf ./eden || true
-	git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-fi
-
 cd ./eden
-git submodule update --init --recursive
 
 if [[ "${ARCH}" == "ARM64" ]]; then
     export EXTRA_CMAKE_FLAGS=(
@@ -51,7 +43,7 @@ fi
 COUNT="$(git rev-list --count HEAD)"
 EXE_NAME="Eden-${COUNT}-Windows-${ARCH}"
 
-mkdir build
+mkdir -p build
 cd build
 cmake .. -G Ninja \
     -DYUZU_TESTS=OFF \
@@ -68,23 +60,21 @@ ninja
 
 # Use windeployqt to gather dependencies
 EXE_PATH=./bin/eden.exe
-mkdir deploy
-cp -r bin/* deploy/
 
 if [[ "${ARCH}" == "ARM64" ]]; then
  	# Use ARM64-specific Qt paths with windeployqt
- 	"D:/a/eden-nightly/Qt/6.8.3/msvc2022_64/bin/windeployqt6.exe" --qtpaths "D:/a/eden-nightly/Qt/6.8.3/msvc2022_arm64/bin/qtpaths6.bat" --release --no-compiler-runtime --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --dir deploy "$EXE_PATH"
+ 	"D:/a/eden-nightly/Qt/6.8.3/msvc2022_64/bin/windeployqt6.exe" --qtpaths "D:/a/eden-nightly/Qt/6.8.3/msvc2022_arm64/bin/qtpaths6.bat" --release --no-compiler-runtime --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --dir bin "$EXE_PATH"
 else
-	windeployqt6 --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir deploy "$EXE_PATH"
+	windeployqt6 --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir bin "$EXE_PATH"
 fi
 
 # Delete un-needed debug files 
-find deploy -type f -name "*.pdb" -exec rm -fv {} +
+find bin -type f -name "*.pdb" -exec rm -fv {} +
 
 # Pack for upload
 mkdir -p artifacts
 mkdir "$EXE_NAME"
-cp -r deploy/* "$EXE_NAME"
+cp -r bin/* "$EXE_NAME"
 ZIP_NAME="$EXE_NAME.7z"
 7z a -t7z -mx=9 "$ZIP_NAME" "$EXE_NAME"
 mv "$ZIP_NAME" artifacts/

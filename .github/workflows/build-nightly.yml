@@ -214,17 +214,29 @@ jobs:
            echo "VULKAN_SDK=C:/VulkanSDK/1.4.313.1" >> $GITHUB_ENV
            echo "PATH=C:/VulkanSDK/1.4.313.1/Bin:$PATH" >> $GITHUB_ENV
            
-      - name: Restore vcpkg cache
-        id: vcpkg-cache
-        uses: TAServers/vcpkg-cache@v3
+      - name: Pull Eden with submodules
+        shell: bash
+        run: |
+          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+            echo "Using mirror instead..."
+            rm -rf ./eden || true
+            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
+          fi
+          cd ./eden
+          git submodule update --init --recursive
+
+      - name: Set up vcpkg cache
+        uses: actions/cache@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          prefix: vcpkg-${{ matrix.target}}/
-          
-      - name: Compile Eden Windows ${{ matrix.target }}
-        env:
-          VCPKG_FEATURE_FLAGS: "binarycaching" # Possibly redundant, but explicitly sets the binary caching feature flag
-          VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"      
+          path: |
+            ${{ github.workspace }}/eden/build/vcpkg_installed
+            ${{ github.workspace }}/eden/build/externals
+            ${{ github.workspace }}/eden/.vcpkg
+          key: ${{ runner.os }}-vcpkg-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-${{ matrix.target }}-
+            
+      - name: Compile Eden Windows ${{ matrix.target }}    
         shell: bash
         run: |
           chmod +x ./eden-windows.sh
