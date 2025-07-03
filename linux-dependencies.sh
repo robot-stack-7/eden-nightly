@@ -71,6 +71,7 @@ pacman -Syu --noconfirm \
 	qt6-tools \
 	qt6-wayland \
  	rapidjson \
+  	sccache \
 	sdl2 \
  	sdl3 \
 	strace \
