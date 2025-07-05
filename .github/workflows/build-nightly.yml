@@ -82,18 +82,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up ccache for ${{ matrix.target }}
+      - name: Restore ccache for ${{ matrix.target }}
         if: ${{ matrix.target != 'aarch64' }}      
-        uses: actions/cache@v4.2.3
+        uses: actions/cache/restore@v4
+        id: restore-ccache-nonaarch64
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-ccache-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-ccache-${{ matrix.target }}-
             
-      - name: set up sccache-cache
+      - name: Restore sccache for ${{ matrix.target }}
         if: ${{ matrix.target == 'aarch64' }}  
-        uses: actions/cache@v4.2.3
+        uses: actions/cache/restore@v4
+        id: restore-sccache-aarch64
         with:
           path: ~/.cache/sccache/
           key: ${{ runner.os }}-sccache-${{ matrix.target }}-${{ github.sha }}
@@ -121,13 +123,27 @@ jobs:
         with:
           name: eden-${{ matrix.target}}-mesa-appbundle
           path: bundle
-          
+
       - name: Upload appimage light
         uses: actions/upload-artifact@v4.6.2
         with:
           name: eden-${{ matrix.target}}-light-appimage
-          path: light        
-          
+          path: light
+
+      - name: Save ccache for ${{ matrix.target }}
+        if: ${{ matrix.target != 'aarch64' && github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.restore-ccache-nonaarch64.outputs.cache-primary-key }}
+
+      - name: Save sccache for ${{ matrix.target }}
+        if: ${{ matrix.target == 'aarch64' && github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/sccache/
+          key: ${{ steps.restore-sccache-aarch64.outputs.cache-primary-key }}
+
   android: 
     runs-on: ubuntu-latest
     strategy:
@@ -137,7 +153,6 @@ jobs:
     name: "Android (${{ matrix.target }})"
     env:
       TARGET: ${{ matrix.target }}
-          
     steps:
       - uses: actions/checkout@v4.2.2
 
@@ -164,8 +179,9 @@ jobs:
           cd ./eden
           git submodule update --init --recursive
           
-      - name: setup cache for ${{ matrix.target }}
-        uses: actions/cache@v4
+      - name: Restore gradle cache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-gradle-cache
         with:
           path: |
             ~/.gradle/caches
@@ -174,8 +190,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-${{ matrix.target }}-
 
-      - name: Set up sccache for ${{ matrix.target }}
-        uses: actions/cache@v4
+      - name: Restore sccache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-sccache-cache
         with:
           path: ~/.cache/sccache/
           key: ${{ runner.os }}-android-sccache-${{ matrix.target }}-${{ github.sha }}
@@ -192,7 +209,23 @@ jobs:
         with:
          name: eden-android-${{ matrix.target }}
          path: eden/src/android/artifacts/
-          
+
+      - name: Save gradle cache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ steps.restore-gradle-cache.outputs.cache-primary-key }}
+
+      - name: Save sccache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/sccache/
+          key: ${{ steps.restore-sccache-cache.outputs.cache-primary-key }}
+
   windows:
     runs-on: windows-2022
     name: "Windows (${{ matrix.target }})"
@@ -249,8 +282,9 @@ jobs:
           cd ./eden
           git submodule update --init --recursive
 
-      - name: Set up vcpkg cache
-        uses: actions/cache@v4
+      - name: Restore vcpkg cache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-vcpkg-cache
         with:
           path: |
             ${{ github.workspace }}/eden/build/vcpkg_installed
@@ -271,7 +305,17 @@ jobs:
         with:
           name: eden-windows-msvc-${{ matrix.target }}
           path: eden/build/artifacts/
-          
+
+      - name: Save vcpkg cache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ github.workspace }}/eden/build/vcpkg_installed
+            ${{ github.workspace }}/eden/build/externals
+            ${{ github.workspace }}/eden/.vcpkg
+          key: ${{ steps.restore-vcpkg-cache.outputs.cache-primary-key }}
+
   macos:
     runs-on: ${{ matrix.runs-on }}
     name: "MacOS (${{ matrix.target }})"
@@ -291,8 +335,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Set up ccache
-        uses: actions/cache@v4
+      - name: Restore ccache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-ccache-cache
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-${{ matrix.target }}-ccache-${{ github.sha }}
@@ -314,6 +359,13 @@ jobs:
           name: eden-macos-${{ matrix.target }}
           path: eden/build/artifacts/
 
+      - name: Save ccache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.restore-ccache-cache.outputs.cache-primary-key }}
+
   freebsd:
     name: FreeBSD 
     runs-on: ubuntu-latest
@@ -323,8 +375,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
-      - name: Set up ccache
-        uses: actions/cache@v4
+      - name: Restore ccache
+        uses: actions/cache/restore@v4
+        id: restore-ccache-cache
         with:
           path: ${{ env.CCACHE_DIR }}
           key: FreeBSD-ccache-${{ github.sha }}
@@ -355,6 +408,12 @@ jobs:
           name: eden-freebsd
           path: eden/build/artifacts/
 
+      - name: Save ccache
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.restore-ccache-cache.outputs.cache-primary-key }}
                     
   release:
     name: "release"
