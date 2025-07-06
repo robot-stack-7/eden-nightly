@@ -46,8 +46,8 @@ xvfb-run -a -- ./lib4bin -p -v -e -s -k \
 
 # include lsfg-vk
 cp -v /usr/lib/liblsfg-vk.so ./shared/lib
-cp -rv /usr/share/vulkan/explicit_layer.d ./share/vulkan
-sed -i 's|../../../lib/||' ./share/vulkan/explicit_layer.d/VkLayer_LS_frame_generation.json
+cp -rv /usr/share/vulkan/implicit_layer.d/ ./share/vulkan
+sed -i 's|../../../lib/||' ./share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
 
 ln -fv ./sharun ./AppRun
 ./sharun -g
