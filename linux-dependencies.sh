@@ -25,11 +25,13 @@ pacman -Syu --noconfirm \
 	gamemode \
 	git \
 	glslang \
+	glfw \
 	glu \
 	hidapi \
  	jq \
 	libass \
 	libdecor \
+	libdisplay-info \
 	libfdk-aac \
 	libopusenc \
  	libtheora \
@@ -76,6 +78,18 @@ pacman -Syu --noconfirm \
 	xorg-server-xvfb \
 	zip \
 	zsync
+
+# build and installlsfg-vk
+git clone https://github.com/PancakeTAS/lsfg-vk.git ./lsfg && (
+	cd ./lsfg
+	CC=clang CXX=clang++ cmake \
+		-B build                    \
+		-G Ninja                    \
+		-DCMAKE_BUILD_TYPE=Release  \
+		-DCMAKE_INSTALL_PREFIX=/usr
+	cmake --build build
+	cmake --install build
+)
 
 
 case "$ARCH" in
