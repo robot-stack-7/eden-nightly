@@ -40,6 +40,9 @@ sed -i 's/list(APPEND CMAKE_PREFIX_PATH "${Qt6_DIR}")/list(PREPEND CMAKE_PREFIX_
 sed -i '/#include <boost\/asio.hpp>/a #include <boost/version.hpp>' src/core/debugger/debugger.cpp
 fi
 
+# workaround for sccache
+find . -name CMakeLists.txt -exec sed -i 's|/W4||g; s|/Zi||g; s|/Zo||g; s|  *| |g' {} +
+
 COUNT="$(git rev-list --count HEAD)"
 EXE_NAME="Eden-${COUNT}-Windows-${ARCH}"
 
@@ -54,9 +57,13 @@ cmake .. -G Ninja \
     -DYUZU_CMD=OFF \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+    -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+    -DYUZU_USE_PRECOMPILED_HEADERS=OFF \
     -DCMAKE_SYSTEM_PROCESSOR=${ARCH} \
     "${EXTRA_CMAKE_FLAGS[@]}"
 ninja
+sccache -s
 
 # Use windeployqt to gather dependencies
 EXE_PATH=./bin/eden.exe

@@ -242,6 +242,7 @@ jobs:
     env:
       TARGET: ${{ matrix.target }}
       ARCH: ${{ matrix.arch }}
+      SCCACHE_DIR: 'C:\Users\runneradmin\AppData\Local\Mozilla\sccache'
     steps:
       - uses: actions/checkout@v4.2.2
           
@@ -263,7 +264,7 @@ jobs:
       - name: Install vulkan-sdk
         shell: bash
         run: |
-           choco install wget -y --no-progress
+           choco install wget sccache -y --no-progress
            mkdir -p D:/a/_temp
            VULKAN_URL="https://sdk.lunarg.com/sdk/download/1.4.313.1/windows/vulkansdk-windows-X64-1.4.313.1.exe"
            wget -q --retry-connrefused --tries=10 "$VULKAN_URL" -O D:/a/_temp/vulkan.exe
@@ -294,6 +295,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-vcpkg-${{ matrix.target }}-
             
+      - name: Restore sccache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-sccache-cache
+        with:
+          path: ${{ env.SCCACHE_DIR }}
+          key: ${{ runner.os }}-sccache-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-sccache-${{ matrix.target }}-
+            
       - name: Compile Eden Windows ${{ matrix.target }}    
         shell: bash
         run: |
@@ -315,7 +325,14 @@ jobs:
             ${{ github.workspace }}/eden/build/externals
             ${{ github.workspace }}/eden/.vcpkg
           key: ${{ steps.restore-vcpkg-cache.outputs.cache-primary-key }}
-
+          
+      - name: Save sccache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.SCCACHE_DIR }}
+          key: ${{ steps.restore-sccache-cache.outputs.cache-primary-key }}
+          
   macos:
     runs-on: ${{ matrix.runs-on }}
     name: "MacOS (${{ matrix.target }})"
