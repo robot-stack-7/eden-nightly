@@ -36,3 +36,12 @@ rm -fv ./light/AppDir/usr/lib/libvulkan.so*
 
 # Bundle libsdl3 to AppDir, needed for steamdeck
 cp /usr/lib/libSDL3.so* ./light/AppDir/usr/lib/
+
+# include lsfg-vk
+cp -v /usr/lib/liblsfg-vk.so ./light/AppDir/usr/lib/
+mkdir -p ./light/AppDir/usr/share/vulkan/implicit_layer.d/
+cp -v /usr/share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json ./light/AppDir/usr/share/vulkan/implicit_layer.d/
+
+# manually set XDG_DATA_DIRS to make sure lsfg-vk included
+sed -i '/^this_dir=.*$/a\
+export XDG_DATA_DIRS="\$this_dir/usr/share:\${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"' ./light/AppDir/AppRun
