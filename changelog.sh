@@ -24,7 +24,7 @@ echo "$COUNT" > ~/count
 # Start to generate release info and changelog
 CHANGELOG_FILE=~/changelog
 BASE_COMMIT_URL="https://git.eden-emu.dev/eden-emu/eden/commit"
-BASE_COMPARE_URL="https://git.eden-emu.dev/eden-emu/eden/compare"
+BASE_COMPARE_URL="https://github.com/pflyly/eden-mirror/compare"
 BASE_DOWNLOAD_URL="https://github.com/pflyly/eden-nightly/releases/download"
 
 # Fallback if OLD_HASH is empty or null
@@ -55,7 +55,7 @@ git log --reverse --pretty=format:"%H %s" "${OLD_HASH}..HEAD" | while IFS= read 
   i=$((i + 1))
 done
 
-# Add full changelog from lastest official tag release
+# Add full changelog from lastest official tag release (temp use my mirror)
 RELEASE_TAG="$(git describe --tags | awk -F'-' '{print $1 "-" $2 "-" $3}')"
 echo "Full Changelog: [\`${RELEASE_TAG}...master\`](${BASE_COMPARE_URL}/${RELEASE_TAG}...master)" >> "$CHANGELOG_FILE"
 echo >> "$CHANGELOG_FILE"
