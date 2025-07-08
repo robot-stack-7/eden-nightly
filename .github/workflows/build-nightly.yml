@@ -259,7 +259,6 @@ jobs:
           target: 'desktop'
           arch: ${{ matrix.qt_arch }}
           modules: qtmultimedia
-          cache: 'true'
           
       - name: Install vulkan-sdk
         shell: bash
