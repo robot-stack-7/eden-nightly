@@ -36,12 +36,17 @@ The builds for Linux are built with several CPU-specific compliler optimization 
 - **AArch64 devices** — compatible with `aarch64` architecture
 
 AppImages built using [**Sharun**](https://github.com/VHSgunzo/sharun) are bundled with **Mesa drivers** to ensure maximum compatibility — similar to Eden’s official releases and may include the latest fixes for certain games (though untested).
->[!WARNING]
-Some users have reported issues with this version. Use with caution and report any problems if possible.
 
 A newly added **AppBundle** version, built with [**pelf**](https://github.com/xplshn/pelf), serves as an alternative to AppImage. It's a lightweight format written in Go and intended for broader Linux compatibility.
 
 A **Light version** Appimage is also available, built with **linuxdeploy**. It does **not** include Mesa drivers, resulting in a more lightweight build that relies on the system’s native graphics drivers — similar to many other emulators.
+
+>[!IMPORTANT]
+All Appimages now include [Lossless Scaling's Frame Generation](https://github.com/PancakeTAS/lsfg-vk) support. \
+To enable it, run your AppImage like this:\
+`MANGOHUD=1 MESA_VK_WSI_PRESENT_MODE=immediate ENABLE_LSFG=1 LSFG_MULTIPLIER=2 /path/to/your.AppImage` \
+Note that for Steamdeck users, LSFG only works in a Wayland session for now. \
+Learn how to use Plasma Wayland on Steam Deck [here](https://www.reddit.com/r/SteamDeck/comments/wfc9pz/how_to_use_plasma_wayland_on_the_steam_deck/)
 
 > ⚠️ The `aarch64` build is based on a workaround change and is intended for testing purposes only.
 >
