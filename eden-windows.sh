@@ -14,7 +14,7 @@ if [[ "${ARCH}" == "ARM64" ]]; then
 # workaround for ffmpeg
 # use prebuilt arm64 ffmpeg from https://github.com/tordona/ffmpeg-win-arm64/releases
 # trimmed unused files according to the ffmpeg x64 build from eden repo
-sed -i 's|set(package_base_url "https://git.eden-emu.dev/eden-emu/")|set(package_base_url "https://github.com/pflyly/eden-nightly/")|' CMakeModules/DownloadExternals.cmake
+sed -i 's|set(package_base_url "https://github.com/eden-emulator/")|set(package_base_url "https://github.com/pflyly/eden-nightly/")|' CMakeModules/DownloadExternals.cmake
 sed -i '/if *(WIN32)/,/^elseif/ {
     s|set(package_repo ".*")|set(package_repo "raw/refs/heads/main/")|
     s|set(package_extension ".*")|set(package_extension ".zip")|
