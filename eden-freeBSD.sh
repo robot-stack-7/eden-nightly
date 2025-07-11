@@ -8,31 +8,16 @@ cd ./eden
 git config --global --add safe.directory .
 COUNT="$(git rev-list --count HEAD)"
 
-# workaound for libusb
-sed -i '' 's/find_package(libusb 1\.0\.24 MODULE)/find_package(libusb 1.0.16 REQUIRED)/' CMakeLists.txt
-
-# workaound for renderdoc
-sed -i '' '/#elif defined(__APPLE__)/i\
-#elif defined(__FreeBSD__)\
-#define RENDERDOC_CC\
-' externals/renderdoc/renderdoc_app.h
-
-# workaound for ffmpeg
-sed -i '' 's/make -j\${SYSTEM_THREADS}/gmake -j\${SYSTEM_THREADS}/' externals/ffmpeg/CMakeLists.txt
-
-# workaround for airplane mode commit: resolve non existed libiw linking
-sed -i '' 's/^if *(UNIX AND NOT APPLE AND NOT ANDROID)/if(CMAKE_SYSTEM_NAME STREQUAL "Linux")/' src/core/CMakeLists.txt
-
 mkdir build
 cd build
 cmake .. -GNinja \
     -DYUZU_TESTS=OFF \
-    -DYUZU_CHECK_SUBMODULES=OFF \
     -DYUZU_USE_FASTER_LD=ON \
     -DYUZU_ENABLE_LTO=ON \
     -DYUZU_USE_BUNDLED_QT=OFF \
     -DENABLE_QT_TRANSLATION=ON \
     -DUSE_DISCORD_PRESENCE=OFF \
+    -DYUZU_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES=ON \
     -DYUZU_CMD=OFF \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_SYSTEM_PROCESSOR="$(uname -m)" \
@@ -40,7 +25,6 @@ cmake .. -GNinja \
     -DCMAKE_CXX_FLAGS="-w" \
     -DCMAKE_C_COMPILER_LAUNCHER=ccache \
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    -DYUZU_USE_PRECOMPILED_HEADERS=OFF \
     -DQt6_DIR=/usr/local/lib/cmake/Qt6
 ninja
 ccache -s-v
