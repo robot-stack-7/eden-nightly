@@ -45,10 +45,10 @@ xvfb-run -a -- ./lib4bin -p -v -e -s -k \
     /usr/lib/libdecor-0.so*
 
 # include lsfg-vk
-cp -v /usr/lib/liblsfg-vk.so ./shared/lib
-cp -rv /usr/share/vulkan/implicit_layer.d/ ./share/vulkan
+wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk.zip"
+unzip -o ./lsfg-vk.zip
 sed -i 's|../../../lib/||' ./share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
-
+rm -f ./lsfg-vk.zip
 ln -fv ./sharun ./AppRun
 ./sharun -g
 

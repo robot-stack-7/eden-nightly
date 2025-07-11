@@ -79,18 +79,6 @@ pacman -Syu --noconfirm \
 	zip \
 	zsync
 
-# build and installlsfg-vk
-git clone https://github.com/PancakeTAS/lsfg-vk.git ./lsfg && (
-	cd ./lsfg
-	CC=clang CXX=clang++ cmake \
-		-B build                    \
-		-G Ninja                    \
-		-DCMAKE_BUILD_TYPE=Release  \
-		-DCMAKE_INSTALL_PREFIX=/usr
-	cmake --build build
-	cmake --install build
-)
-
 
 case "$ARCH" in
 	'x86_64')  

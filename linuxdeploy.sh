@@ -38,9 +38,12 @@ rm -fv ./light/AppDir/usr/lib/libvulkan.so*
 cp /usr/lib/libSDL3.so* ./light/AppDir/usr/lib/
 
 # include lsfg-vk
-cp -v /usr/lib/liblsfg-vk.so ./light/AppDir/usr/lib/
-mkdir -p ./light/AppDir/usr/share/vulkan/implicit_layer.d/
-cp -v /usr/share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json ./light/AppDir/usr/share/vulkan/implicit_layer.d/
+(
+  cd ./light/AppDir/usr
+  wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk.zip"
+  unzip -o ./lsfg-vk.zip
+  rm -f ./lsfg-vk.zip
+)
 
 # manually set XDG_DATA_DIRS to make sure lsfg-vk included
 sed -i '/^this_dir=.*$/a\
