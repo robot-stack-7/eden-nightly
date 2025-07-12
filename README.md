@@ -13,7 +13,7 @@
 This repository provides **unofficial nightly releases** of **Eden** for the following platforms:
 
 - **Linux** (`x86_64`, `aarch64`)
-- **FreeBSD** (Highly Experimental)
+- **FreeBSD** (`amd64`)
 - **Android** — *Cancelled from release for now*
 - **Windows** (`x86_64`, `arm64`)
 - **MacOS** (`x86_64`, `arm64`)
@@ -35,7 +35,7 @@ The builds for Linux are built with several CPU-specific compliler optimization 
 - **Legacy x86_64 CPUs** — compatible with baseline `x86-64`, means can run on virtually all 64-bit x86 processors (via the Legacy Build)
 - **AArch64 devices** — compatible with `aarch64` architecture
 
-AppImages built using [**Sharun**](https://github.com/VHSgunzo/sharun) are bundled with **Mesa drivers** to ensure maximum compatibility — similar to Eden’s official releases and may include the latest fixes for certain games (though untested).
+AppImages built using [**Sharun**](https://github.com/VHSgunzo/sharun) are bundled with **Mesa drivers** to ensure maximum compatibility — similar to Eden’s official releases and may include the latest fixes for certain games (though untested). These builds should work on any linux distro.
 
 A newly added **AppBundle** version, built with [**pelf**](https://github.com/xplshn/pelf), serves as an alternative to AppImage. It's a lightweight format written in Go and intended for broader Linux compatibility.
 
@@ -45,19 +45,11 @@ A **Light version** Appimage is also available, built with **linuxdeploy**. It d
 All Appimages now include [Lossless Scaling's Frame Generation](https://github.com/PancakeTAS/lsfg-vk) support. \
 To enable it, run your AppImage like this:\
 `MANGOHUD=1 MESA_VK_WSI_PRESENT_MODE=immediate ENABLE_LSFG=1 LSFG_MULTIPLIER=2 /path/to/your.AppImage` \
-Note that for Steamdeck users, LSFG only works in a Wayland session for now. \
-Learn how to use Plasma Wayland on Steam Deck [here](https://www.reddit.com/r/SteamDeck/comments/wfc9pz/how_to_use_plasma_wayland_on_the_steam_deck/)
-
-> ⚠️ The `aarch64` build is based on a workaround change and is intended for testing purposes only.
->
-> If you encounter any problems, you're welcome to open an issue.
-
-These builds should work on any linux distro.
 
 ---------------------------------------------------------------
 
 ### FreeBSD Builds
-> ⚠️ FreeBSD builds are **not officially supported** at the moment and are provided for **testing purposes only**.
+> ⚠️ FreeBSD builds are provided for **testing purposes only**.
 >   
 > Functionality may be limited and issues are expected. If you encounter any problems, you're welcome to open an issue.
 > 
@@ -69,15 +61,15 @@ Eden nightly for Android is available in two versions:
 
 - **Replace** Build
   
-Shares the same application ID as the official Eden release. Installing this version will replace the official app on your device. It appears as "**eden**" on the home screen.
+Shares the same application ID as the official Eden release. Installing this version will replace the official app on your device. It appears as "**Eden**" on the home screen.
 
 - **Coexist** Build
   
-Uses a nightly application ID, allowing it to coexist with the official Eden release. It appears as "**eden unofficial**" on the home screen, and "**Eden Unofficial**" on the main screen of eden.
+Uses a nightly application ID, allowing it to coexist with the official Eden release. It appears as "**Eden unofficial**" on the home screen, and "**Eden Unofficial**" on the main screen of eden.
 
 - **Optimised** Build
   
-Using com.miHoYo.Yuanshen for application ID to enable device dependent features such as AI frame generation. It appears as "**eden Optimised**" on the home screen.
+Using com.miHoYo.Yuanshen for application ID to enable device dependent features such as AI frame generation. It appears as "**Eden Optimised**" on the home screen.
 
 ---------------------------------------------------------------
 
@@ -94,7 +86,6 @@ Using com.miHoYo.Yuanshen for application ID to enable device dependent features
 > ⚠️ MacOS builds are **not officially supported** at the moment and are provided for **testing purposes only**.
 >   
 > Functionality may be limited and issues are expected. If you encounter any problems, you're welcome to open an issue.
-
 
 ---------------------------------------------------------------
 
