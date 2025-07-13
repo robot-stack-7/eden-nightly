@@ -38,12 +38,14 @@ rm -fv ./light/AppDir/usr/lib/libvulkan.so*
 cp /usr/lib/libSDL3.so* ./light/AppDir/usr/lib/
 
 # include lsfg-vk
-(
-  cd ./light/AppDir/usr
-  wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk.zip"
-  unzip -o ./lsfg-vk.zip
-  rm -f ./lsfg-vk.zip
-)
+if [ "$ARCH" = "x86_64" ]; then
+  (
+    cd ./light/AppDir/usr
+    wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk.zip"
+    unzip -o ./lsfg-vk.zip
+    rm -f ./lsfg-vk.zip
+  )
+fi
 
 # manually set XDG_DATA_DIRS to make sure lsfg-vk included
 sed -i '/^this_dir=.*$/a\

@@ -45,10 +45,12 @@ xvfb-run -a -- ./lib4bin -p -v -e -s -k \
     /usr/lib/libdecor-0.so*
 
 # include lsfg-vk
-wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk.zip"
-unzip -o ./lsfg-vk.zip
-sed -i 's|../../../lib/||' ./share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
-rm -f ./lsfg-vk.zip
+if [ "$ARCH" = "x86_64" ]; then
+    wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk.zip"
+    unzip -o ./lsfg-vk.zip
+    sed -i 's|../../../lib/||' ./share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
+    rm -f ./lsfg-vk.zip
+fi
 ln -fv ./sharun ./AppRun
 ./sharun -g
 
