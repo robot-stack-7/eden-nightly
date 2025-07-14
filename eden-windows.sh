@@ -57,20 +57,19 @@ cmake .. -G Ninja \
     -DYUZU_CMD=OFF \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_C_COMPILER_LAUNCHER=sccache \
-    -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
-    -DYUZU_USE_PRECOMPILED_HEADERS=OFF \
     -DCMAKE_SYSTEM_PROCESSOR=${ARCH} \
     "${EXTRA_CMAKE_FLAGS[@]}"
 ninja
-sccache -s
 
 # Use windeployqt to gather dependencies
 EXE_PATH=./bin/eden.exe
 
 if [[ "${ARCH}" == "ARM64" ]]; then
- 	# Use ARM64-specific Qt paths with windeployqt
- 	"D:/a/eden-nightly/Qt/6.8.3/msvc2022_64/bin/windeployqt6.exe" --qtpaths "D:/a/eden-nightly/Qt/6.8.3/msvc2022_arm64/bin/qtpaths6.bat" --release --no-compiler-runtime --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --dir bin "$EXE_PATH"
+ 	# Make sure to include missing libva.dll
+  	find externals/ffmpeg-7.1.1/ -type f -name "libva.dll" -exec cp -v {} ./bin/ \;
+   
+  	# Use ARM64-specific Qt paths with windeployqt
+ 	"D:/a/eden-nightly/Qt/6.9.1/msvc2022_64/bin/windeployqt6.exe" --qtpaths "D:/a/eden-nightly/Qt/6.9.1/msvc2022_arm64/bin/qtpaths6.bat" --release --no-compiler-runtime --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --dir bin "$EXE_PATH"
 else
 	windeployqt6 --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir bin "$EXE_PATH"
 fi

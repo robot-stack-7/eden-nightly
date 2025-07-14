@@ -230,7 +230,7 @@ jobs:
           key: ${{ steps.restore-sccache-cache.outputs.cache-primary-key }}
 
   windows:
-    runs-on: windows-2022
+    runs-on: windows-latest
     name: "Windows (${{ matrix.target }})"
     continue-on-error: true
     strategy:
@@ -257,11 +257,11 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.8.3'
+          version: '6.9.1'
           host: 'windows'
           target: 'desktop'
           arch: ${{ matrix.qt_arch }}
-          modules: qtmultimedia
+          modules: qtmultimedia qt5compat
           
       - name: Install vulkan-sdk
         shell: bash
@@ -297,14 +297,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-vcpkg-${{ matrix.target }}-
             
-      - name: Restore sccache for ${{ matrix.target }}
-        uses: actions/cache/restore@v4
-        id: restore-sccache-cache
-        with:
-          path: ${{ env.SCCACHE_DIR }}
-          key: ${{ runner.os }}-sccache-${{ matrix.target }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-sccache-${{ matrix.target }}-
+#      - name: Restore sccache for ${{ matrix.target }}
+#        uses: actions/cache/restore@v4
+#        id: restore-sccache-cache
+#        with:
+#          path: ${{ env.SCCACHE_DIR }}
+#         key: ${{ runner.os }}-sccache-${{ matrix.target }}-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-sccache-${{ matrix.target }}-
             
       - name: Compile Eden Windows ${{ matrix.target }}    
         shell: bash
@@ -328,12 +328,12 @@ jobs:
             ${{ github.workspace }}/eden/.vcpkg
           key: ${{ steps.restore-vcpkg-cache.outputs.cache-primary-key }}
           
-      - name: Save sccache for ${{ matrix.target }}
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.SCCACHE_DIR }}
-          key: ${{ steps.restore-sccache-cache.outputs.cache-primary-key }}
+#      - name: Save sccache for ${{ matrix.target }}
+#        if: ${{ github.ref_name == 'main' }}
+#        uses: actions/cache/save@v4
+#        with:
+#          path: ${{ env.SCCACHE_DIR }}
+#          key: ${{ steps.restore-sccache-cache.outputs.cache-primary-key }}
           
   macos:
     runs-on: ${{ matrix.runs-on }}

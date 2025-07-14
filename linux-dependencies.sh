@@ -59,9 +59,9 @@ pacman -Syu --noconfirm \
 	qt6-multimedia \
 	qt6-tools \
 	qt6-wayland \
-	qt6-5compat \
+ 	qt6-5compat \
  	rapidjson \
-  	sccache \
+  sccache \
 	sdl2 \
  	sdl3 \
 	strace \
