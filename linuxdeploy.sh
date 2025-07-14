@@ -2,7 +2,7 @@
 
 set -ex
 
-export APPIMAGE_EXTRACT_AND_RUN=1 
+export APPIMAGE_EXTRACT_AND_RUN=1
 export ARCH=$(uname -m)
 
 BUILD_DIR=$(realpath "$1")
@@ -41,9 +41,9 @@ cp /usr/lib/libSDL3.so* ./light/AppDir/usr/lib/
 if [ "$ARCH" = "x86_64" ]; then
   (
     cd ./light/AppDir/usr
-    wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk.zip"
-    unzip -o ./lsfg-vk.zip
-    rm -f ./lsfg-vk.zip
+    wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk_archlinux.zip"
+    unzip -o ./lsfg-vk_archlinux.zip
+    rm -f ./lsfg-vk_archlinux.zip
   )
 fi
 
