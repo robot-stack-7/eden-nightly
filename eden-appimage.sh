@@ -14,24 +14,24 @@ PELF="https://github.com/xplshn/pelf/releases/latest/download/pelf_$ARCH"
 case "$1" in
     steamdeck)
         echo "Making Eden Optimized Build for Steam Deck"
-        CMAKE_CXX_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -Wno-error"
-        CMAKE_C_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -Wno-error"
+        CMAKE_CXX_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -w"
+        CMAKE_C_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -w"
 	YUZU_USE_PRECOMPILED_HEADERS=OFF
 	CCACHE="ccache"
         TARGET="Steamdeck"
         ;;
     rog)
         echo "Making Eden Optimized Build for ROG ALLY X"
-        CMAKE_CXX_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -Wno-error"
-        CMAKE_C_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -Wno-error"
+        CMAKE_CXX_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -w"
+        CMAKE_C_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -w"
 	YUZU_USE_PRECOMPILED_HEADERS=OFF
 	CCACHE="ccache"
         TARGET="ROG_ALLY"
         ;;
     common)
         echo "Making Eden Optimized Build for Modern CPUs"
-        CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -Wno-error"
-        CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -Wno-error"
+        CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -w"
+        CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -w"
 	YUZU_USE_PRECOMPILED_HEADERS=OFF
 	CCACHE="ccache"
         ARCH="${ARCH}_v3"
@@ -39,8 +39,8 @@ case "$1" in
         ;;
     legacy)
         echo "Making Eden Optimized Build for Legacy CPUs"
-        CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -Wno-error"
-        CMAKE_C_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -Wno-error"
+        CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -w"
+        CMAKE_C_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -w"
 	YUZU_USE_PRECOMPILED_HEADERS=OFF
 	CCACHE="ccache"
         TARGET="Legacy"

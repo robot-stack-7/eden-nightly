@@ -1,6 +1,6 @@
 name: Build Eden Nightly
 concurrency:
-  group: build-eden-nightly-${{ github.ref }}
+  group: build-eden-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -275,7 +275,7 @@ jobs:
            D:/a/_temp/vulkan.exe --accept-licenses --default-answer --confirm-command install
            echo "VULKAN_SDK=C:/VulkanSDK/1.4.313.1" >> $GITHUB_ENV
            echo "PATH=C:/VulkanSDK/1.4.313.1/Bin:$PATH" >> $GITHUB_ENV
-           
+    
       - name: Pull Eden with submodules
         shell: bash
         run: |
@@ -286,6 +286,7 @@ jobs:
           fi
           cd ./eden
           git submodule update --init --recursive
+          echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
 
       - name: Restore vcpkg cache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
@@ -308,17 +309,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ccache-${{ matrix.target }}-
             
-      - name: Compile Eden Windows ${{ matrix.target }}    
+      - name: Compile Eden Windows ${{ matrix.target }}
         shell: bash
         run: |
           chmod +x ./eden-windows.sh
           ./eden-windows.sh
           
-      - name: Upload
+      - name: Generate installer for ${{ matrix.target }}
+        shell: cmd
+        run: |
+          cd installer
+          "C:\Program Files (x86)\NSIS\makensis.exe" /DPRODUCT_VARIANT=${{ matrix.arch }} /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
+          mkdir artifacts 2>nul
+          move /y *.exe artifacts\
+          
+      - name: Upload Eden 7z ${{ matrix.target }}
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-windows-msvc-${{ matrix.target }}
+          name: eden-windows-7z-${{ matrix.target }}
           path: eden/build/artifacts/
+
+      - name: Upload Eden installer ${{ matrix.target }}
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: eden-windows-installer-${{ matrix.target }}
+          path: installer/artifacts/
 
       - name: Save vcpkg cache for ${{ matrix.target }}
         if: ${{ github.ref_name == 'main' }}
@@ -520,13 +535,20 @@ jobs:
         
       - uses: actions/download-artifact@v4.3.0
         with:
-           name: eden-windows-msvc-x86_64
+           name: eden-windows-7z-x86_64
         
       - uses: actions/download-artifact@v4.3.0
         with:
-           name: eden-windows-msvc-x86_arm64
-        continue-on-error: true
+           name: eden-windows-7z-x86_arm64
+           
+      - uses: actions/download-artifact@v4.3.0
+        with:
+           name: eden-windows-installer-x86_64
         
+      - uses: actions/download-artifact@v4.3.0
+        with:
+           name: eden-windows-installer-x86_arm64
+           
       - uses: actions/download-artifact@v4.3.0
         with:
            name: eden-macos-x86_64
@@ -575,4 +597,4 @@ jobs:
           fail_on_unmatched_files: false
           make_latest: true
           files: |
-            *.AppImage*, *.AppBundle*, *.7z, *.tar.xz
+            *.AppImage*, *.AppBundle*, *.7z, *.tar.xz *.exe
