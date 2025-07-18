@@ -27,18 +27,16 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 ; Setup MultiUser support:
-; If launched without ability to elevate, user will not see any extra options.
-; If user has ability to elevate, they can choose to install system-wide, with default to CurrentUser.
 !define MULTIUSER_EXECUTIONLEVEL Highest
 !define MULTIUSER_INSTALLMODE_INSTDIR "${PRODUCT_NAME}"
 !define MULTIUSER_MUI
 !define MULTIUSER_INSTALLMODE_COMMANDLINE
 !define MULTIUSER_USE_PROGRAMFILES64
-!include "MultiUser.nsh"
 
+!include "MultiUser.nsh"
 !include "MUI2.nsh"
-; Custom page plugin
 !include "nsDialogs.nsh"
+!include "FileFunc.nsh"
 
 ; MUI Settings
 !define MUI_ICON "eden.ico"
@@ -48,21 +46,20 @@ ShowUnInstDetails show
 !insertmacro MUI_PAGE_LICENSE "..\LICENSE"
 
 ; All/Current user selection page
+!define MULTIUSER_PAGE_CUSTOMFUNCTION_LEAVE InstallModeLeave
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 
-; Desktop Shortcut page
-Page custom desktopShortcutPageCreate desktopShortcutPageLeave
-
 ; Directory page
-!include "FileFunc.nsh"
-!define MUI_PAGE_CUSTOMFUNCTION_PRE pre.Directory
 !insertmacro MUI_PAGE_DIRECTORY
-  
+
+; Install option page
+Page custom InstallOptionPageCreate InstallOptionPageLeave
+
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 
 ; Finish page
-!insertmacro MUI_PAGE_FINISH
+Page custom CustomFinishPageCreate CustomFinishPageLeave
 
 ; Clean Uninstall page
 UninstPage custom un.CleanUninstallPageCreate un.CleanUninstallPageLeave
@@ -75,13 +72,18 @@ UninstPage custom un.CustomFinishPageCreate un.CustomFinishPageLeave
 
 ; Variables
 Var DisplayName
-Var DesktopShortcutPageDialog
+Var InstallOptionPageDialog
 Var DesktopShortcutCheckbox
 Var DesktopShortcut
 Var PortableModeCheckbox
 Var PortableMode
 Var CleanInstallCheckbox
 Var CleanInstall
+Var CustomFinishPageDialog
+Var AssociateFilesCheckbox
+Var AssociateFiles
+Var LaunchEdenCheckbox
+Var LaunchEden
 Var UninstallerPageDialog
 Var CleanUninstallCheckbox
 Var CleanUninstall
@@ -122,10 +124,22 @@ Var OpenLatest
 ; MUI end ------
 
 Function .onInit
-  StrCpy $DesktopShortcut 0 ; default to unchecked
   !insertmacro MULTIUSER_INIT
-  
   !insertmacro MUI_LANGDLL_DISPLAY
+
+  ; Installed version detection
+  ReadRegStr $R0 HKCU "${PRODUCT_UNINST_KEY}" "DisplayVersion"
+  ${If} $R0 == ""
+    ReadRegStr $R0 HKLM "${PRODUCT_UNINST_KEY}" "DisplayVersion"
+  ${EndIf}
+
+  ${If} $R0 != ""
+    IntCmp $R0 ${PRODUCT_VERSION} continue continue warn
+    warn:
+      MessageBox MB_ICONEXCLAMATION|MB_YESNO "A newer version of Eden ($R0) is already installed.$\nYou are attempting to install an older version (${PRODUCT_VERSION}).$\n$\nDo you want to continue with the downgrade?" IDYES continue
+      Abort
+    continue:
+  ${EndIf}
 FunctionEnd
 
 Function un.onInit
@@ -140,11 +154,34 @@ FunctionEnd
   ${EndIf}
 !macroend
 
-Function desktopShortcutPageCreate
+!macro ResetCleanInstall
+  StrCpy $CleanInstall 0
+  ${NSD_SetState} $CleanInstallCheckbox $CleanInstall
+  Abort
+!macroend
+
+!macro ResetCleanUninstall
+  StrCpy $CleanUninstall 0
+  ${NSD_SetState} $CleanUninstallCheckbox $CleanUninstall
+  Abort
+!macroend
+
+Function InstallModeLeave
+  ; Read previous install path from registry
+  ReadRegStr $R0 HKCU "${PRODUCT_UNINST_KEY}" "InstallLocation"
+  ${If} $R0 == ""
+    ReadRegStr $R0 HKLM "${PRODUCT_UNINST_KEY}" "InstallLocation"
+  ${EndIf}
+  ${If} $R0 != ""
+    StrCpy $INSTDIR "$R0"
+  ${EndIf}
+FunctionEnd
+    
+Function InstallOptionPageCreate
   !insertmacro MUI_HEADER_TEXT "Installation Options" "Customize your Eden installation"
   nsDialogs::Create 1018
-  Pop $DesktopShortcutPageDialog
-  ${If} $DesktopShortcutPageDialog == error
+  Pop $InstallOptionPageDialog
+  ${If} $InstallOptionPageDialog == error
     Abort
   ${EndIf}
 
@@ -163,35 +200,107 @@ Function desktopShortcutPageCreate
   nsDialogs::Show
 FunctionEnd
 
-Function desktopShortcutPageLeave
+Function InstallOptionPageLeave
   ${NSD_GetState} $DesktopShortcutCheckbox $DesktopShortcut
   ${NSD_GetState} $PortableModeCheckbox $PortableMode
   ${NSD_GetState} $CleanInstallCheckbox $CleanInstall
   
-  ${If} $CleanInstall == 1
-    MessageBox MB_ICONEXCLAMATION|MB_YESNO "Clean Install Warning:$\n$\nThis will permanently delete all user configuration, cache and save files.$\n$\nAre you sure you want to continue?" IDYES continue
-    StrCpy $CleanInstall 0
-    ${NSD_SetState} $CleanInstallCheckbox $CleanInstall
-    Abort
-    continue:
+  ; Detect both portable mode and appdata configs
+  StrCpy $0 0 ; initial portable mode
+  StrCpy $1 0 ; initial appdata exits
+
+  ${If} ${FileExists} "$INSTDIR\user"
+    StrCpy $0 1
   ${EndIf}
+
+  SetShellVarContext current ; Set current due to eden default config location
+  ${If} ${FileExists} "$APPDATA\eden"
+    StrCpy $1 1
+  ${EndIf}
+  
+  ${If} $CleanInstall == 1
+    ${If} $0 == 0
+      ${If} $1 == 0
+        MessageBox MB_ICONINFORMATION "No previous user data was found! Clean install is not needed."
+        !insertmacro ResetCleanInstall
+      ${Else}
+        MessageBox MB_ICONEXCLAMATION|MB_YESNO "Default mode user data detected in AppData at:$\n$APPDATA\eden$\n$\nDo you want to delete it?$\nThis will remove all user settings, caches, and saves." IDYES continue
+        !insertmacro ResetCleanInstall
+        continue:
+      ${EndIf}
+    ${ElseIf} $0 == 1
+      ${If} $1 == 1
+        MessageBox MB_ICONEXCLAMATION|MB_YESNO "Multiple user data folders were detected:$\n$\n- Portable mode: $INSTDIR\user$\n- Default mode: $APPDATA\eden$\n$\nDo you want to delete them both?$\nThis will remove all user settings, caches, and saves." IDYES continue2
+        !insertmacro ResetCleanInstall
+        continue2:
+      ${Else}
+        MessageBox MB_ICONEXCLAMATION|MB_YESNO "Portable mode user data detected at:$\n$INSTDIR\user$\n$\nDo you want to delete it?$\nThis will remove all user settings, caches, and saves." IDYES continue3
+        !insertmacro ResetCleanInstall
+        continue3:
+      ${EndIf}
+    ${EndIf}
+  ${ElseIf} $PortableMode == 1
+    ${If} $0 == 1
+      ${If} $1 == 1
+        MessageBox MB_ICONQUESTION|MB_YESNO "Portable mode selected, but multiple user data folders were detected:$\n$\n- Portable mode: $INSTDIR\user$\n- Default mode: $APPDATA\eden$\n$\nDo you want to use the AppData user data to overwrite the portable one?" IDYES use_appdata
+        ; If user chose to keep portable mode user data
+        RMDir /r "$APPDATA\eden"
+        MessageBox MB_ICONINFORMATION "Default mode user data folders deleted. Using portable user data."
+        Goto done_migration
+        
+        use_appdata:
+          RMDir /r "$INSTDIR\user"
+          CreateDirectory "$INSTDIR\user"
+          CopyFiles /SILENT "$APPDATA\eden\*" "$INSTDIR\user\"
+          MessageBox MB_ICONINFORMATION "Default mode user data migrated to portable mode."
+        Goto done_migration
+      ${Else}
+        ; Only portable exists, do nothing
+        MessageBox MB_ICONINFORMATION "Portable mode enabled. Existing user data will be used."
+      ${EndIf}
+    ${Else}
+      ${If} $1 == 1
+        MessageBox MB_YESNO|MB_ICONQUESTION "Portable mode selected, but default mode user data detected at:$\n$APPDATA\eden$\n$\nDo you want to migrate it to portable mode?" IDNO skip_migration
+        CreateDirectory "$INSTDIR\user"
+        CopyFiles /SILENT "$APPDATA\eden\*" "$INSTDIR\user\"
+        RMDir /r "$APPDATA\eden"
+        MessageBox MB_ICONINFORMATION "Default mode user data migrated to portable mode."
+        skip_migration:
+      ${Else}
+        ; If none of previous user data exists, just create the user folder
+        CreateDirectory "$INSTDIR\user"
+        MessageBox MB_ICONINFORMATION "Portable mode enabled. A new user data folder was created."
+      ${EndIf}
+    ${EndIf}
+  ${EndIf}
+  done_migration:
 FunctionEnd
 
-Function pre.Directory
-  ; Set correct shell context first, maybe redundant, but I need to be sure about it
-  ${If} $MultiUser.InstallMode == "CurrentUser"
-    SetShellVarContext current
-  ${Else}
-    SetShellVarContext all
+Function CustomFinishPageCreate
+  !insertmacro MUI_HEADER_TEXT "Installation Complete" "Eden has been installed successfully."
+  nsDialogs::Create 1018
+  Pop $CustomFinishPageDialog
+  ${If} $CustomFinishPageDialog == error
+    Abort
   ${EndIf}
 
-  ; Now try to read previous install path from registry
-  ReadRegStr $R0 SHCTX "${PRODUCT_UNINST_KEY}" "InstallLocation"
-  ${If} $R0 != ""
-    StrCpy $INSTDIR "$R0"
-    DetailPrint "Restoring install location: $R0"
-  ${Else}
-    DetailPrint "No previous install location found, using default: $INSTDIR"
+  ${NSD_CreateCheckbox} 0u 0u 100% 12u "Associate Eden with .nsp, .xci files"
+  Pop $AssociateFilesCheckbox
+  ${NSD_SetState} $AssociateFilesCheckbox $AssociateFiles
+
+  ${NSD_CreateCheckbox} 0u 16u 100% 12u "Launch Eden after install"
+  Pop $LaunchEdenCheckbox
+  ${NSD_SetState} $LaunchEdenCheckbox $LaunchEden
+
+  nsDialogs::Show
+FunctionEnd
+
+Function CustomFinishPageLeave
+  ${NSD_GetState} $AssociateFilesCheckbox $AssociateFiles
+  ${NSD_GetState} $LaunchEdenCheckbox $LaunchEden
+  
+  ${If} $LaunchEden == 1
+    Exec "$INSTDIR\eden.exe"
   ${EndIf}
 FunctionEnd
 
@@ -203,7 +312,7 @@ Function un.CleanUninstallPageCreate
     Abort
   ${EndIf}
 
-  ${NSD_CreateCheckbox} 0u 0u 100% 12u "Remove all user data"
+  ${NSD_CreateCheckbox} 0u 0u 100% 12u "Clean Uninstall (Remove all user data)"
   Pop $CleanUninstallCheckbox
   ${NSD_SetState} $CleanUninstallCheckbox 0 ; unchecked by default
 
@@ -212,12 +321,41 @@ FunctionEnd
 
 Function un.CleanUninstallPageLeave
   ${NSD_GetState} $CleanUninstallCheckbox $CleanUninstall
+
   ${If} $CleanUninstall == 1
-    MessageBox MB_ICONEXCLAMATION|MB_YESNO "Clean Uninstall Warning:$\n$\nThis will permanently delete all user configuration, cache and save files.$\n$\nAre you sure you want to continue?" IDYES continue
-    StrCpy $CleanUninstall 0
-    ${NSD_SetState} $CleanUninstallCheckbox $CleanUninstall
-    Abort
-    continue:
+    ; Detect both portable mode and appdata configs
+    StrCpy $0 0 ; initial portable mode
+    StrCpy $1 0 ; initial appdata exits
+
+    ${If} ${FileExists} "$INSTDIR\user"
+      StrCpy $0 1
+    ${EndIf}
+
+    SetShellVarContext current ; Set current due to eden default config location
+    ${If} ${FileExists} "$APPDATA\eden"
+      StrCpy $1 1
+    ${EndIf}
+
+    ${If} $0 == 0
+      ${If} $1 == 0
+        MessageBox MB_ICONINFORMATION "No user data was found! Clean uninstall is not needed."
+        !insertmacro ResetCleanUninstall
+      ${Else}
+        MessageBox MB_ICONEXCLAMATION|MB_YESNO "User data detected in AppData at:$\n$APPDATA\eden$\n$\nDo you want to delete it?$\nThis will remove all user settings, caches, and saves." IDYES continue
+        !insertmacro ResetCleanUninstall
+        continue:
+      ${EndIf}
+    ${ElseIf} $0 == 1
+      ${If} $1 == 1
+        MessageBox MB_ICONEXCLAMATION|MB_YESNO "Multiple user data folders were detected:$\n$\n- Portable mode: $INSTDIR\user$\n- Default mode: $APPDATA\eden$\n$\nDo you want to delete them both?$\nThis will remove all user settings, caches, and saves." IDYES continue2
+        !insertmacro ResetCleanUninstall
+        continue2:
+      ${Else}
+        MessageBox MB_ICONEXCLAMATION|MB_YESNO "Portable mode user data detected at:$\n$INSTDIR\user$\n$\nDo you want to delete it?$\nThis will remove all user settings, caches, and saves." IDYES continue3
+        !insertmacro ResetCleanUninstall
+        continue3:
+      ${EndIf}
+    ${EndIf}
   ${EndIf}
 FunctionEnd
 
@@ -243,41 +381,40 @@ Function un.CustomFinishPageLeave
   ${EndIf}
 FunctionEnd
 
-Section "Base"
-
+Section "Installation"
   SectionIn RO
-
+  !insertmacro UPDATE_DISPLAYNAME
+  
   ${If} $CleanInstall == 1
     ${If} $INSTDIR != ""
       ${If} ${FileExists} "$INSTDIR\eden.exe"
         RMDir /r "$INSTDIR"
       ${EndIf}
 
-      ; If NOT in portable mode, also clean eden config dir in AppData\Roaming
-      ${IfNot} $PortableMode == 1
+      ; Attempt to clean portable mode data if exists
+      ${If} ${FileExists} "$INSTDIR\user"
+        RMDir /r "$INSTDIR\user"
+      ${EndIf}
+        
+      ; Attempt to clean AppData config if exists
+      SetShellVarContext current
+      ${If} ${FileExists} "$APPDATA\eden"
         DeleteRegKey HKCU "Software\eden"
         RMDir /r "$APPDATA\eden"
       ${EndIf}
+        
+      ; Remove old start menu shortcuts
+      Delete "$SMPROGRAMS\${PRODUCT_NAME}\$DisplayName.lnk"
+      Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall $DisplayName.lnk"
+      RMDir  "$SMPROGRAMS\${PRODUCT_NAME}"
+
+      ; Remove old desktop shortcut
+      Delete "$DESKTOP\$DisplayName.lnk" 
     ${EndIf}
   ${EndIf}
 
   SetOutPath "$INSTDIR"
-
-  ; The binplaced build output will be included verbatim.
   File /r "${BINARY_SOURCE_DIR}\*"
-
-  !insertmacro UPDATE_DISPLAYNAME
-  
-  ; Ensure shell var context matches the install mode
-  ${If} $MultiUser.InstallMode == "CurrentUser"
-    SetShellVarContext current
-  ${Else}
-    SetShellVarContext all
-  ${EndIf}
-
-  ${If} $PortableMode == 1
-    CreateDirectory "$INSTDIR\user"
-  ${EndIf}
 
   ; Create start menu and desktop shortcuts
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
@@ -287,16 +424,44 @@ Section "Base"
     CreateShortCut "$DESKTOP\$DisplayName.lnk" "$INSTDIR\eden.exe"
   ${EndIf}
 
-  ; ??
   SetOutPath "$TEMP"
+  SetAutoClose false
 SectionEnd
 
-!include "FileFunc.nsh"
-
-Section -Post
+Section -RegisterUninstallerMetadata
   WriteUninstaller "$INSTDIR\uninst.exe"
 
   WriteRegStr SHCTX "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\eden.exe"
+  
+  ${If} $AssociateFiles == 1
+    ${If} $MultiUser.InstallMode == "AllUsers"
+      ; NSP association
+      WriteRegStr HKCR ".nsp" "" "eden.nsp"
+      WriteRegStr HKCR "eden.nsp" "" "Eden NSP File"
+      WriteRegStr HKCR "eden.nsp\DefaultIcon" "" "$INSTDIR\eden.exe,0"
+      WriteRegStr HKCR "eden.nsp\shell\open\command" "" '"$INSTDIR\eden.exe" "%1"'
+
+      ; XCI association
+      WriteRegStr HKCR ".xci" "" "eden.xci"
+      WriteRegStr HKCR "eden.xci" "" "Eden XCI File"
+      WriteRegStr HKCR "eden.xci\DefaultIcon" "" "$INSTDIR\eden.exe,0"
+      WriteRegStr HKCR "eden.xci\shell\open\command" "" '"$INSTDIR\eden.exe" "%1"'
+
+    ${Else}
+      ; NSP association
+      WriteRegStr HKCU "Software\Classes\.nsp" "" "eden.nsp"
+      WriteRegStr HKCU "Software\Classes\eden.nsp" "" "Eden NSP File"
+      WriteRegStr HKCU "Software\Classes\eden.nsp\DefaultIcon" "" "$INSTDIR\eden.exe,0"
+      WriteRegStr HKCU "Software\Classes\eden.nsp\shell\open\command" "" '"$INSTDIR\eden.exe" "%1"'
+
+      ; XCI association
+      WriteRegStr HKCU "Software\Classes\.xci" "" "eden.xci"
+      WriteRegStr HKCU "Software\Classes\eden.xci" "" "Eden XCI File"
+      WriteRegStr HKCU "Software\Classes\eden.xci\DefaultIcon" "" "$INSTDIR\eden.exe,0"
+      WriteRegStr HKCU "Software\Classes\eden.xci\shell\open\command" "" '"$INSTDIR\eden.exe" "%1"'
+    ${EndIf}
+  ${EndIf}
+
 
   ; Write metadata for add/remove programs applet
   WriteRegStr SHCTX "${PRODUCT_UNINST_KEY}" "DisplayName" "$DisplayName"
@@ -315,28 +480,23 @@ SectionEnd
 Section Uninstall
   !insertmacro UPDATE_DISPLAYNAME
 
-  ; Ensure we use the correct shell var context
-  ${If} $MultiUser.InstallMode == "CurrentUser"
-    SetShellVarContext current
-  ${Else}
-    SetShellVarContext all
-  ${EndIf}
-
   ; Remove shortcuts
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall $DisplayName.lnk"
   Delete "$DESKTOP\$DisplayName.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\$DisplayName.lnk"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
     
-  ; Clean user data first on clean uninstall mode
   ${If} $CleanUninstall == 1
+    ; Attempt to clean portable mode data if exists
     ${If} ${FileExists} "$INSTDIR\user"
-      ; Portable mode
       RMDir /r "$INSTDIR\user"
-    ${Else}
-      ; Normal mode
-      RMDir /r "$APPDATA\eden"
+    ${EndIf}
+        
+    ; Attempt to clean AppData config if exists
+    SetShellVarContext current
+    ${If} ${FileExists} "$APPDATA\eden"
       DeleteRegKey HKCU "Software\eden"
+      RMDir /r "$APPDATA\eden"
     ${EndIf}
   ${EndIf}
     
@@ -353,9 +513,27 @@ Section Uninstall
   RMDir /r "$INSTDIR\tls"
   RMDir /r "$INSTDIR\translations"
   RMDir "$INSTDIR"
+
+  ; Delete eden's file associations
+  ${If} $MultiUser.InstallMode == "AllUsers"
+    DeleteRegKey HKCR ".nsp"
+    DeleteRegKey HKCR ".xci"
+    DeleteRegKey HKCR "eden.nsp"
+    DeleteRegKey HKCR "eden.xci"
+  ${Else}
+    DeleteRegKey HKCU "Software\Classes\.nsp"
+    DeleteRegKey HKCU "Software\Classes\.xci"
+    DeleteRegKey HKCU "Software\Classes\eden.nsp"
+    DeleteRegKey HKCU "Software\Classes\eden.xci"
+  ${EndIf}
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.nsp"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xci"
+
   
-  DeleteRegKey SHCTX "${PRODUCT_UNINST_KEY}"
-  DeleteRegKey SHCTX "${PRODUCT_DIR_REGKEY}"
+  DeleteRegKey HKCU "${PRODUCT_UNINST_KEY}"
+  DeleteRegKey HKLM "${PRODUCT_UNINST_KEY}"
+  DeleteRegKey HKCU "${PRODUCT_DIR_REGKEY}"
+  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
 
   SetAutoClose false
 SectionEnd

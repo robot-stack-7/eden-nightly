@@ -38,7 +38,7 @@ sed -i 's/list(APPEND CMAKE_PREFIX_PATH "${Qt6_DIR}")/list(PREPEND CMAKE_PREFIX_
 sed -i '/#include <boost\/asio.hpp>/a #include <boost/version.hpp>' src/core/debugger/debugger.cpp
 fi
 
-# disable debug info and silence warnings
+# disable debug info and silence warnings. turns out this can reduce build time, so we keep it.
 find . -name CMakeLists.txt -exec sed -i 's|/W4||g; s|/Zi||g; s|/Zo||g; s|  *| |g' {} +
 
 COUNT="$(git rev-list --count HEAD)"
