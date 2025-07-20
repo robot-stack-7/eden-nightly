@@ -16,15 +16,9 @@
 !define PRODUCT_WEB_SITE "https://eden-emu.dev/"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
-
 !define BINARY_SOURCE_DIR "..\eden\build\bin"
-
-Name "${PRODUCT_NAME}"
-OutFile "Eden-${PRODUCT_VERSION}-Windows-${PRODUCT_VARIANT}-Installer.exe"
-BrandingText "${PRODUCT_NAME} Installer v${PRODUCT_VERSION} (${PRODUCT_VARIANT})"
-SetCompressor /SOLID lzma
-ShowInstDetails show
-ShowUnInstDetails show
+!define MUI_ICON "eden.ico"
+!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
 ; Setup MultiUser support:
 !define MULTIUSER_EXECUTIONLEVEL Highest
@@ -38,9 +32,35 @@ ShowUnInstDetails show
 !include "nsDialogs.nsh"
 !include "FileFunc.nsh"
 
-; MUI Settings
-!define MUI_ICON "eden.ico"
-!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+; Variables
+Var InstallOptionPageDialog
+Var DesktopShortcutCheckbox
+Var DesktopShortcut
+Var PortableModeCheckbox
+Var PortableMode
+Var CleanInstallCheckbox
+Var CleanInstall
+Var BackupUserDataCheckbox
+Var BackupUserData
+Var CustomFinishPageDialog
+Var AssociateFilesCheckbox
+Var AssociateFiles
+Var LaunchEdenCheckbox
+Var LaunchEden
+Var UninstallerPageDialog
+Var CleanUninstallCheckbox
+Var CleanUninstall
+Var UnFinishPageDialog
+Var OpenLatestCheckbox
+Var OpenLatest
+
+Name "${PRODUCT_NAME}"
+OutFile "Eden-${PRODUCT_VERSION}-Windows-${PRODUCT_VARIANT}-Installer.exe"
+BrandingText "${PRODUCT_NAME} Installer v${PRODUCT_VERSION} (${PRODUCT_VARIANT})"
+SetCompressor /SOLID lzma
+ShowInstDetails show
+ShowUnInstDetails show
+ManifestDPIAware true
 
 ; License page
 !insertmacro MUI_PAGE_LICENSE "..\LICENSE"
@@ -70,34 +90,13 @@ UninstPage custom un.CleanUninstallPageCreate un.CleanUninstallPageLeave
 ; Uninstaller finish page
 UninstPage custom un.CustomFinishPageCreate un.CustomFinishPageLeave
 
-; Variables
-Var DisplayName
-Var InstallOptionPageDialog
-Var DesktopShortcutCheckbox
-Var DesktopShortcut
-Var PortableModeCheckbox
-Var PortableMode
-Var CleanInstallCheckbox
-Var CleanInstall
-Var CustomFinishPageDialog
-Var AssociateFilesCheckbox
-Var AssociateFiles
-Var LaunchEdenCheckbox
-Var LaunchEden
-Var UninstallerPageDialog
-Var CleanUninstallCheckbox
-Var CleanUninstall
-Var UnFinishPageDialog
-Var OpenLatestCheckbox
-Var OpenLatest
-
 ; Language files
+!insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "Arabic"
 !insertmacro MUI_LANGUAGE "Catalan"
 !insertmacro MUI_LANGUAGE "Czech"
 !insertmacro MUI_LANGUAGE "Danish"
 !insertmacro MUI_LANGUAGE "Dutch"
-!insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "Finnish"
 !insertmacro MUI_LANGUAGE "French"
 !insertmacro MUI_LANGUAGE "German"
@@ -121,38 +120,19 @@ Var OpenLatest
 !insertmacro MUI_LANGUAGE "Ukrainian"
 !insertmacro MUI_LANGUAGE "Vietnamese"
 
-; MUI end ------
-
 Function .onInit
   !insertmacro MULTIUSER_INIT
   !insertmacro MUI_LANGDLL_DISPLAY
-
-  ; Installed version detection
-  ReadRegStr $R0 HKCU "${PRODUCT_UNINST_KEY}" "DisplayVersion"
-  ${If} $R0 == ""
-    ReadRegStr $R0 HKLM "${PRODUCT_UNINST_KEY}" "DisplayVersion"
-  ${EndIf}
-
-  ${If} $R0 != ""
-    IntCmp $R0 ${PRODUCT_VERSION} continue continue warn
-    warn:
-      MessageBox MB_ICONEXCLAMATION|MB_YESNO "A newer version of Eden ($R0) is already installed.$\nYou are attempting to install an older version (${PRODUCT_VERSION}).$\n$\nDo you want to continue with the downgrade?" IDYES continue
-      Abort
-    continue:
-  ${EndIf}
 FunctionEnd
 
 Function un.onInit
   !insertmacro MULTIUSER_UNINIT
-FunctionEnd
-
-!macro UPDATE_DISPLAYNAME
-  ${If} $MultiUser.InstallMode == "CurrentUser"
-    StrCpy $DisplayName "$(^Name) (User)"
+  ${If} $MultiUser.InstallMode == "AllUsers"
+    SetShellVarContext all
   ${Else}
-    StrCpy $DisplayName "$(^Name)"
+    SetShellVarContext current
   ${EndIf}
-!macroend
+FunctionEnd
 
 !macro ResetCleanInstall
   StrCpy $CleanInstall 0
@@ -189,15 +169,75 @@ Function InstallOptionPageCreate
   Pop $DesktopShortcutCheckbox
   ${NSD_SetState} $DesktopShortcutCheckbox $DesktopShortcut
 
-  ${NSD_CreateCheckbox} 0u 16u 100% 12u "Enable portable mode (Store Eden config folders in install folder)"
+  ${NSD_CreateCheckbox} 0u 16u 100% 12u "Enable portable mode (Store Eden user data in install folder)"
   Pop $PortableModeCheckbox
   ${NSD_SetState} $PortableModeCheckbox $PortableMode
 
-  ${NSD_CreateCheckbox} 0u 32u 100% 12u "Clean install (Remove previous installation files)"
+  ${NSD_CreateCheckbox} 0u 32u 100% 12u "Clean install (Remove previous installation files and user data)"
   Pop $CleanInstallCheckbox
   ${NSD_SetState} $CleanInstallCheckbox $CleanInstall
 
+  ${NSD_CreateCheckbox} 0u 48u 100% 12u "Back up user data"
+  Pop $BackupUserDataCheckbox
+  ${NSD_SetState} $BackupUserDataCheckbox $BackupUserData
+  ShowWindow $BackupUserDataCheckbox ${SW_HIDE}
+
+  GetFunctionAddress $0 ClickCleanInstall
+  nsDialogs::OnClick $CleanInstallCheckbox $0
+  GetFunctionAddress $0 ClickBackupUserData
+  nsDialogs::OnClick $BackupUserDataCheckbox $0
+  
   nsDialogs::Show
+FunctionEnd
+    
+Function ClickCleanInstall
+  Pop $R0
+  ${NSD_GetState} $CleanInstallCheckbox $CleanInstall
+  ${If} $CleanInstall == 1
+    ShowWindow $BackupUserDataCheckbox ${SW_SHOW}
+  ${Else}
+    ShowWindow $BackupUserDataCheckbox ${SW_HIDE}
+    StrCpy $BackupUserData 0
+    ${NSD_SetState} $BackupUserDataCheckbox $BackupUserData
+  ${EndIf}
+FunctionEnd
+
+Function ClickBackupUserData
+  Pop $R0
+  ${NSD_GetState} $BackupUserDataCheckbox $BackupUserData
+  ${If} $BackupUserData == 1
+    MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to back up your Eden user data now?" IDYES continue
+    StrCpy $BackupUserData 0
+    ${NSD_SetState} $BackupUserDataCheckbox $BackupUserData
+    Goto end 
+    
+    continue:
+    Call DoBackupUserData
+    EnableWindow $BackupUserDataCheckbox 0
+  ${EndIf}
+  end:
+FunctionEnd
+
+Function DoBackupUserData
+  ${GetTime} "" "LS" $R1 $R2 $R3 $R4 $R5 $R6 $R7
+  StrCpy $R8 "$R3-$R2-$R1_$R5-$R6-$R7"
+  StrCpy $R9 "$DOCUMENTS\EdenBackup\$R8"
+  CreateDirectory "$R9"
+
+  ; Backup AppData user data
+  SetShellVarContext current
+  ${If} ${FileExists} "$APPDATA\eden"
+    CreateDirectory "$R9\AppData"
+    CopyFiles /SILENT "$APPDATA\eden\*" "$R9\AppData\"
+  ${EndIf}
+
+  ; Backup Portable user data
+  ${If} ${FileExists} "$INSTDIR\user"
+    CreateDirectory "$R9\Portable"
+    CopyFiles /SILENT "$INSTDIR\user\*" "$R9\Portable\"
+  ${EndIf}
+
+  MessageBox MB_ICONINFORMATION "Your Eden user data has been backed up to:$\n$R9"
 FunctionEnd
 
 Function InstallOptionPageLeave
@@ -316,9 +356,69 @@ Function un.CleanUninstallPageCreate
   Pop $CleanUninstallCheckbox
   ${NSD_SetState} $CleanUninstallCheckbox 0 ; unchecked by default
 
+  ${NSD_CreateCheckbox} 0u 16u 100% 12u "Back up user data"
+  Pop $BackupUserDataCheckbox
+  ${NSD_SetState} $BackupUserDataCheckbox $BackupUserData
+  ShowWindow $BackupUserDataCheckbox ${SW_HIDE}
+
+  GetFunctionAddress $0 un.ClickCleanUninstall
+  nsDialogs::OnClick $CleanUninstallCheckbox $0
+  GetFunctionAddress $0 un.ClickBackupUserData
+  nsDialogs::OnClick $BackupUserDataCheckbox $0
+  
   nsDialogs::Show
 FunctionEnd
 
+Function un.ClickCleanUninstall
+  Pop $R0
+  ${NSD_GetState} $CleanUninstallCheckbox $CleanUninstall
+  ${If} $CleanUninstall == 1
+    ShowWindow $BackupUserDataCheckbox ${SW_SHOW}
+  ${Else}
+    ShowWindow $BackupUserDataCheckbox ${SW_HIDE}
+    StrCpy $BackupUserData 0
+    ${NSD_SetState} $BackupUserDataCheckbox 0
+  ${EndIf}
+FunctionEnd
+    
+Function un.ClickBackupUserData
+  Pop $R0
+  ${NSD_GetState} $BackupUserDataCheckbox $BackupUserData
+  ${If} $BackupUserData == 1
+    MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to back up your Eden user data now?" IDYES continue
+    StrCpy $BackupUserData 0
+    ${NSD_SetState} $BackupUserDataCheckbox $BackupUserData
+    Goto end
+    
+    continue:
+    Call un.DoBackupUserData
+    EnableWindow $BackupUserDataCheckbox 0
+  ${EndIf}
+  end:
+FunctionEnd
+
+Function un.DoBackupUserData
+  ${GetTime} "" "LS" $R1 $R2 $R3 $R4 $R5 $R6 $R7
+  StrCpy $R8 "$R3-$R2-$R1_$R5-$R6-$R7"
+  StrCpy $R9 "$DOCUMENTS\EdenBackup\$R8"
+  CreateDirectory "$R9"
+
+  ; Backup AppData user data
+  SetShellVarContext current
+  ${If} ${FileExists} "$APPDATA\eden"
+    CreateDirectory "$R9\AppData"
+    CopyFiles /SILENT "$APPDATA\eden\*" "$R9\AppData\"
+  ${EndIf}
+
+  ; Backup Portable user data
+  ${If} ${FileExists} "$INSTDIR\user"
+    CreateDirectory "$R9\Portable"
+    CopyFiles /SILENT "$INSTDIR\user\*" "$R9\Portable\"
+  ${EndIf}
+
+  MessageBox MB_ICONINFORMATION "Your Eden user data has been backed up to:$\n$R9"
+FunctionEnd
+    
 Function un.CleanUninstallPageLeave
   ${NSD_GetState} $CleanUninstallCheckbox $CleanUninstall
 
@@ -383,7 +483,6 @@ FunctionEnd
 
 Section "Installation"
   SectionIn RO
-  !insertmacro UPDATE_DISPLAYNAME
   
   ${If} $CleanInstall == 1
     ${If} $INSTDIR != ""
@@ -404,12 +503,19 @@ Section "Installation"
       ${EndIf}
         
       ; Remove old start menu shortcuts
-      Delete "$SMPROGRAMS\${PRODUCT_NAME}\$DisplayName.lnk"
-      Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall $DisplayName.lnk"
+      Delete "$SMPROGRAMS\${PRODUCT_NAME}\$(^Name).lnk"
+      Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall $(^Name).lnk"
       RMDir  "$SMPROGRAMS\${PRODUCT_NAME}"
 
       ; Remove old desktop shortcut
-      Delete "$DESKTOP\$DisplayName.lnk" 
+      Delete "$DESKTOP\$(^Name).lnk" 
+    ${EndIf}
+  ${EndIf}
+
+  ; Recreate $INSTDIR\user folder if clean install + portable mode
+  ${If} $CleanInstall == 1
+    ${If} $PortableMode == 1
+      CreateDirectory "$INSTDIR\user"
     ${EndIf}
   ${EndIf}
 
@@ -418,13 +524,12 @@ Section "Installation"
 
   ; Create start menu and desktop shortcuts
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\$DisplayName.lnk" "$INSTDIR\eden.exe"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall $DisplayName.lnk" "$INSTDIR\uninst.exe" "/$MultiUser.InstallMode"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\$(^Name).lnk" "$INSTDIR\eden.exe"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall $(^Name).lnk" "$INSTDIR\uninst.exe" "/$MultiUser.InstallMode"
   ${If} $DesktopShortcut == 1
-    CreateShortCut "$DESKTOP\$DisplayName.lnk" "$INSTDIR\eden.exe"
+    CreateShortCut "$DESKTOP\$(^Name).lnk" "$INSTDIR\eden.exe"
   ${EndIf}
 
-  SetOutPath "$TEMP"
   SetAutoClose false
 SectionEnd
 
@@ -462,9 +567,8 @@ Section -RegisterUninstallerMetadata
     ${EndIf}
   ${EndIf}
 
-
   ; Write metadata for add/remove programs applet
-  WriteRegStr SHCTX "${PRODUCT_UNINST_KEY}" "DisplayName" "$DisplayName"
+  WriteRegStr SHCTX "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr SHCTX "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe /$MultiUser.InstallMode"
   WriteRegStr SHCTX "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\eden.exe"
   WriteRegStr SHCTX "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
@@ -478,12 +582,11 @@ Section -RegisterUninstallerMetadata
 SectionEnd
 
 Section Uninstall
-  !insertmacro UPDATE_DISPLAYNAME
 
   ; Remove shortcuts
-  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall $DisplayName.lnk"
-  Delete "$DESKTOP\$DisplayName.lnk"
-  Delete "$SMPROGRAMS\${PRODUCT_NAME}\$DisplayName.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall $(^Name).lnk"
+  Delete "$DESKTOP\$(^Name).lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\$(^Name).lnk"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
     
   ${If} $CleanUninstall == 1
@@ -529,7 +632,6 @@ Section Uninstall
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.nsp"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xci"
 
-  
   DeleteRegKey HKCU "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKCU "${PRODUCT_DIR_REGKEY}"
