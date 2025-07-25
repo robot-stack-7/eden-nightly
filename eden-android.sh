@@ -25,7 +25,7 @@ if [ "$TARGET" = "Optimised" ]; then
 fi 
 
 COUNT="$(git rev-list --count HEAD)"
-APK_NAME="Eden-${COUNT}-Android-Unofficial-${TARGET}"
+APK_NAME="Eden-${COUNT}-Android-${TARGET}"
 
 cd src/android
 chmod +x ./gradlew

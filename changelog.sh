@@ -15,8 +15,7 @@ cd ./eden
 # Get current commit info
 COUNT="$(git rev-list --count HEAD)"
 DATE="$(date +"%Y-%m-%d")"
-HASH="$(git rev-parse --short HEAD)"
-TAG="${DATE}-${HASH}"
+TAG="${DATE}-${COUNT}"
 SOURCE_NAME="Eden-${COUNT}-Source-Code"
 echo "$TAG" > ~/tag
 echo "$COUNT" > ~/count
@@ -27,13 +26,13 @@ BASE_COMMIT_URL="https://git.eden-emu.dev/eden-emu/eden/commit"
 BASE_COMPARE_URL="https://git.eden-emu.dev/eden-emu/eden/compare"
 BASE_DOWNLOAD_URL="https://github.com/pflyly/eden-nightly/releases/download"
 
-# Fallback if OLD_HASH is empty or null
-if [ -z "$OLD_HASH" ] || [ "$OLD_HASH" = "null" ]; then
-  echo "OLD_HASH is empty, falling back to current HASH"
-  OLD_HASH="$HASH"
+# Fallback if OLD_COUNT is empty or null
+if [ -z "$OLD_COUNT" ] || [ "$OLD_COUNT" = "null" ]; then
+  echo "OLD_COUNT is empty, falling back to current COUNT"
+  OLD_COUNT="$COUNT"
 fi
-START_COUNT=$(git rev-list --count "$OLD_HASH")
-i=$((START_COUNT + 1))
+OLD_HASH=$(git rev-list --reverse HEAD | sed -n "${OLD_COUNT}p")
+i=$((OLD_COUNT + 1))
 
 # Add reminder and Release Overview link
 echo ">[!WARNING]" > "$CHANGELOG_FILE"
@@ -82,7 +81,7 @@ echo "| Linux (AppBundle) | **AppImage alternative**<br>────────
 [\`Steamdeck x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Steamdeck-x86_64.dwfs.AppBundle)<br><br>\
 [\`aarch64 (Experimental)\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Linux-aarch64.dwfs.AppBundle) |" >> "$CHANGELOG_FILE"
 echo "| FreeBSD (Experimental) | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-amd64.tar.xz) |" >> "$CHANGELOG_FILE"
-echo "| Android | **Cancelled** |" >> "$CHANGELOG_FILE"
+echo "| Android | [\`Replace\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Replace.apk)<br><br>[\`Coexist\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Coexist.apk)<br><br>[\`Optimised\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised.apk) |" >> "$CHANGELOG_FILE"
 echo "| Windows | **7z**<br>────────────────<br>\
 [\`arm64 (Experimental)\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-ARM64.7z)<br><br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-x86_64.7z) | \
@@ -96,7 +95,7 @@ echo "| [Source Code](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Source-Code.7z) 
 cd ..
 mkdir -p artifacts
 mkdir "$SOURCE_NAME"
-cp -av eden/. "$SOURCE_NAME"
+cp -a eden/. "$SOURCE_NAME"
 ZIP_NAME="$SOURCE_NAME.7z"
 7z a -t7z -mx=9 "$ZIP_NAME" "$SOURCE_NAME"
 mv "$ZIP_NAME" artifacts/

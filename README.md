@@ -14,7 +14,7 @@ This repository provides **unofficial nightly releases** of **Eden** for the fol
 
 - **Linux** (`x86_64`, `aarch64`)
 - **FreeBSD** (`amd64`)
-- **Android** — *Cancelled from release for now*
+- **Android**
 - **Windows** (`x86_64`, `arm64`)
 - **MacOS** (`x86_64`, `arm64`)
 
@@ -43,8 +43,7 @@ A **Light version** Appimage is also available, built with **linuxdeploy**. It d
 
 >[!IMPORTANT]
 All Appimages now include [Lossless Scaling's Frame Generation](https://github.com/PancakeTAS/lsfg-vk) support. \
-To enable it, run your AppImage like this:\
-`MANGOHUD=1 MESA_VK_WSI_PRESENT_MODE=immediate ENABLE_LSFG=1 LSFG_MULTIPLIER=2 /path/to/your.AppImage` \
+Check the official [wiki](https://github.com/PancakeTAS/lsfg-vk/wiki/Configuring-lsfg%E2%80%90vk) to know how to enable it.
 
 ---------------------------------------------------------------
 
