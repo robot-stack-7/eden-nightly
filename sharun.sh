@@ -53,6 +53,3 @@ if [ "$ARCH" = "x86_64" ]; then
 fi
 ln -fv ./sharun ./AppRun
 ./sharun -g
-
-# Fix broken hardware accel, credit @xlc-dev
-echo 'LIBVA_DRIVERS_PATH=${SHARUN_DIR}/shared/lib:${SHARUN_DIR}/shared/lib/dri' >> ./.env
