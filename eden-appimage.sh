@@ -17,6 +17,7 @@ case "$1" in
         CMAKE_CXX_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -w"
         CMAKE_C_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -w"
 	YUZU_USE_PRECOMPILED_HEADERS=OFF
+ 	PROFILE="steamdeck"
 	CCACHE="ccache"
         TARGET="Steamdeck"
         ;;
@@ -25,6 +26,7 @@ case "$1" in
         CMAKE_CXX_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -w"
         CMAKE_C_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -w"
 	YUZU_USE_PRECOMPILED_HEADERS=OFF
+ 	PROFILE="steamdeck"
 	CCACHE="ccache"
         TARGET="ROG_ALLY"
         ;;
@@ -87,6 +89,7 @@ cmake .. -GNinja \
     -DCMAKE_SYSTEM_PROCESSOR="$(uname -m)" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_EXE_LINKER_FLAGS="-Wl,--as-needed" \
+    -DYUZU_SYSTEM_PROFILE="${PROFILE:-}" \
     -DCMAKE_C_COMPILER_LAUNCHER="${CCACHE:-}" \
     -DCMAKE_CXX_COMPILER_LAUNCHER="${CCACHE:-}" \
     ${YUZU_USE_PRECOMPILED_HEADERS:+-DYUZU_USE_PRECOMPILED_HEADERS=$YUZU_USE_PRECOMPILED_HEADERS} \

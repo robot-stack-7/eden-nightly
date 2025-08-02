@@ -6,10 +6,8 @@ cd ./eden
 
 # don't build tests and build real release type
 sed -i '/"-DYUZU_ENABLE_LTO=ON"/a\
-                    "-DCMAKE_BUILD_TYPE=Release",\
                     "-DCMAKE_C_COMPILER_LAUNCHER=sccache",\
-                    "-DCMAKE_CXX_COMPILER_LAUNCHER=sccache",\
-                    "-DYUZU_TESTS=OFF",
+                    "-DCMAKE_CXX_COMPILER_LAUNCHER=sccache",
 ' src/android/app/build.gradle.kts
 
 if [ "$TARGET" = "Coexist" ]; then
@@ -21,6 +19,7 @@ fi
 
 if [ "$TARGET" = "Optimised" ]; then
     # Add optimised to the app home screen
+    sed -i 's/resValue("string", "app_name_suffixed", "Eden")/resValue("string", "app_name_suffixed", "Eden Optimised")/' src/android/app/build.gradle.kts
     sed -i 's|<string name="app_name"[^>]*>.*</string>|<string name="app_name" translatable="false">Eden Optimised</string>|' src/android/app/src/main/res/values/strings.xml
 fi 
 

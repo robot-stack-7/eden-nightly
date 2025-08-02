@@ -26,13 +26,19 @@ export QMAKE="/usr/bin/qmake6"
 export QT_SELECT=6
 export QT_QPA_PLATFORM="wayland;xcb"
 export EXTRA_PLATFORM_PLUGINS="libqwayland-egl.so;libqwayland-generic.so;libqxcb.so"
-export EXTRA_QT_PLUGINS="svg;wayland-decoration-client;wayland-graphics-integration-client;wayland-shell-integration;waylandcompositor;xcb-gl-integration;platformthemes/libqt6ct.so"
+export EXTRA_QT_MODULES="svg;waylandcompositor"
 
 # start to deploy
 NO_STRIP=1 ./linuxdeploy --appdir ./light/AppDir --plugin qt --plugin checkrt
 
 # remove libvulkan because it causes issues with gamescope
 rm -fv ./light/AppDir/usr/lib/libvulkan.so*
+
+# remove useless dev files
+find "$APPDIR/usr" -name '*.a' -type f -exec rm -fv {} \;
+rm -rf "$APPDIR/usr/include"
+rm -rf "$APPDIR/usr/lib/cmake"
+rm -rf "$APPDIR/usr/lib/pkgconfig"
 
 # Bundle libsdl3 to AppDir, needed for steamdeck
 cp /usr/lib/libSDL3.so* ./light/AppDir/usr/lib/
