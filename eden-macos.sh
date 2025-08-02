@@ -17,6 +17,9 @@ fi
 cd ./eden
 git submodule update --init --recursive
 
+# attempt to fix the build error
+sed -i '' 's/VideoCommon::Offset3D(0, 0, 0)/VideoCommon::Offset3D{0, 0, 0}/g' src/video_core/renderer_vulkan/vk_texture_cache.cpp
+
 COUNT="$(git rev-list --count HEAD)"
 APP_NAME="Eden-${COUNT}-MacOS-${TARGET}"
 

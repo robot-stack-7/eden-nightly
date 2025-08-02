@@ -36,17 +36,3 @@ rm -fv ./light/AppDir/usr/lib/libvulkan.so*
 
 # Bundle libsdl3 to AppDir, needed for steamdeck
 cp /usr/lib/libSDL3.so* ./light/AppDir/usr/lib/
-
-# include lsfg-vk
-if [ "$ARCH" = "x86_64" ]; then
-  (
-    cd ./light/AppDir/usr
-    wget --retry-connrefused --tries=30 "https://pancake.gay/lsfg-vk/lsfg-vk_archlinux.zip"
-    unzip -o ./lsfg-vk_archlinux.zip
-    rm -f ./lsfg-vk_archlinux.zip
-  )
-fi
-
-# manually set XDG_DATA_DIRS to make sure lsfg-vk included
-sed -i '/^this_dir=.*$/a\
-export XDG_DATA_DIRS="\$this_dir/usr/share:\${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"' ./light/AppDir/AppRun

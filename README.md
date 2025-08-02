@@ -41,10 +41,6 @@ A newly added **AppBundle** version, built with [**pelf**](https://github.com/xp
 
 A **Light version** Appimage is also available, built with **linuxdeploy**. It does **not** include Mesa drivers, resulting in a more lightweight build that relies on the system’s native graphics drivers — similar to many other emulators.
 
->[!IMPORTANT]
-All Appimages now include [Lossless Scaling's Frame Generation](https://github.com/PancakeTAS/lsfg-vk) support. \
-Check the official [wiki](https://github.com/PancakeTAS/lsfg-vk/wiki/Configuring-lsfg%E2%80%90vk) to know how to enable it.
-
 ---------------------------------------------------------------
 
 ### FreeBSD Builds

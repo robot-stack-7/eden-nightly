@@ -230,7 +230,7 @@ jobs:
           key: ${{ steps.restore-sccache-cache.outputs.cache-primary-key }}
 
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     name: "Windows (${{ matrix.target }})"
     continue-on-error: true
     strategy:
@@ -458,7 +458,7 @@ jobs:
   release:
     name: "release"
     if: ${{ github.ref_name == 'main' }}
-    needs: [info, appimage, windows, macos, freebsd, android]
+    needs: [info, appimage, windows, macos, android, freebsd]
     permissions:
       actions: read
       security-events: write
@@ -554,14 +554,17 @@ jobs:
            name: eden-windows-installer-x86_arm64
            
       - uses: actions/download-artifact@v4.3.0
+        continue-on-error: true
         with:
            name: eden-macos-x86_64
         
       - uses: actions/download-artifact@v4.3.0
+        continue-on-error: true
         with:
            name: eden-macos-arm64
         
       - uses: actions/download-artifact@v4.3.0
+        continue-on-error: true
         with:
            name: eden-freebsd
         
