@@ -64,17 +64,17 @@ echo "## Unofficial Nightly Release: ${COUNT}" >> "$CHANGELOG_FILE"
 echo "| Platform | Target / Arch | |" >> "$CHANGELOG_FILE"
 echo "|--|--|--|" >> "$CHANGELOG_FILE"
 echo "| Linux (AppImage) | **Full Builds (Built with Sharun)**<br><sub>Best compatibility — includes Mesa drivers</sub><br>────────────────<br>\
-[\`Common x86_64_v3\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Common-x86_64_v3.AppImage) ~ 107 MB<br><br>\
-[\`Legacy x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Legacy-x86_64.AppImage) ~ 107 MB<br><br>\
-[\`Steamdeck x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Steamdeck-x86_64.AppImage) ~ 107 MB<br><br>\
-[\`ROG ALLY x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-ROG_ALLY-x86_64.AppImage) ~ 107 MB<br><br>\
-[\`aarch64 (Experimental)\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Linux-aarch64.AppImage) ~ 100 MB | \
+[\`Common x86_64_v3\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Common-x86_64_v3.AppImage)<br><br>\
+[\`Legacy x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Legacy-x86_64.AppImage)<br><br>\
+[\`Steamdeck x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Steamdeck-x86_64.AppImage)<br><br>\
+[\`ROG ALLY x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-ROG_ALLY-x86_64.AppImage)<br><br>\
+[\`aarch64 (Experimental)\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Linux-aarch64.AppImage) | \
 **Light Builds (Built with Linuxdeploy)**<br><sub>Lighter size — uses system drivers</sub><br>────────────────<br>\
-[\`Common-light x86_64_v3\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Common-light-x86_64_v3.AppImage) ~ 47 MB<br><br>\
-[\`Legacy-light x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Legacy-light-x86_64.AppImage) ~ 47 MB<br><br>\
-[\`Steamdeck-light x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Steamdeck-light-x86_64.AppImage) ~ 47 MB<br><br>\
-[\`ROG-ALLY-light x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-ROG_ALLY-light-x86_64.AppImage) ~ 47 MB<br><br>\
-[\`aarch64-light (Experimental)\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Linux-light-aarch64.AppImage) ~ 45 MB |" >> "$CHANGELOG_FILE"
+[\`Common-light x86_64_v3\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Common-light-x86_64_v3.AppImage)<br><br>\
+[\`Legacy-light x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Legacy-light-x86_64.AppImage)<br><br>\
+[\`Steamdeck-light x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Steamdeck-light-x86_64.AppImage)<br><br>\
+[\`ROG-ALLY-light x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-ROG_ALLY-light-x86_64.AppImage)<br><br>\
+[\`aarch64-light (Experimental)\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Linux-light-aarch64.AppImage) |" >> "$CHANGELOG_FILE"
 echo "| Linux (AppBundle) | **AppImage alternative**<br>────────────────<br>\
 [\`Common x86_64_v3\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Common-x86_64_v3.dwfs.AppBundle)<br><br>\
 [\`Legacy x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Legacy-x86_64.dwfs.AppBundle)<br><br>\
