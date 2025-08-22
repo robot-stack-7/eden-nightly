@@ -34,8 +34,13 @@ PKG_NAME="Eden-${COUNT}-FreeBSD-${ARCH}"
 PKG_DIR="${PKG_NAME}/usr/local"
 EDEN_PATH="${PKG_DIR}/bin/eden"
 
-mkdir -p "${PKG_NAME}"
-DESTDIR="${PKG_NAME}" ninja install
+# Create base pkg dir
+mkdir -p "${PKG_DIR}/bin"
+cp -v ./bin/eden "${PKG_DIR}/bin"
+mkdir -p "${PKG_DIR}/share/applications/"
+cp -v ../dist/org.eden_emu.eden.desktop "${PKG_DIR}/share/applications/"
+mkdir -p "${PKG_DIR}/share/icons/hicolor/scalable/apps/"
+cp -v ../dist/org.eden_emu.eden.svg "${PKG_DIR}/share/icons/hicolor/scalable/apps/"
 
 mkdir -p "${PKG_DIR}/lib/qt6"
 

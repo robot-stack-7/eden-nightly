@@ -12,7 +12,6 @@ if [[ "${ARCH}" == "ARM64" ]]; then
     EXTRA_CMAKE_FLAGS+=(
         -DYUZU_USE_BUNDLED_SDL2=OFF
         -DYUZU_USE_EXTERNAL_SDL2=ON
-        -DCMAKE_SYSTEM_NAME=Windows
     )
 
     # ... (适用于ARM64的sed命令)
@@ -65,6 +64,7 @@ cmake .. -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_C_COMPILER_LAUNCHER=ccache \
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+    -DYUZU_USE_PRECOMPILED_HEADERS=OFF \
     -DCMAKE_SYSTEM_PROCESSOR=${ARCH} \
     "${EXTRA_CMAKE_FLAGS[@]}"
 

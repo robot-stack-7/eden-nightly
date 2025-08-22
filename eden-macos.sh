@@ -17,8 +17,26 @@ fi
 cd ./eden
 git submodule update --init --recursive
 
-# attempt to fix the build error
+# fix 1
 sed -i '' 's/VideoCommon::Offset3D(0, 0, 0)/VideoCommon::Offset3D{0, 0, 0}/g' src/video_core/renderer_vulkan/vk_texture_cache.cpp
+
+# fix 2, caused by commit e807e32b1a
+sed -i '' 's/\(#elif defined(__unix__)\)/\1 || defined(__APPLE__)/' src/core/internal_network/network.h
+sed -i '' 's/\(#elif defined(__unix__)\)/\1 || defined(__APPLE__)/' src/core/internal_network/sockets.h
+sed -i '' 's/#ifdef __unix__/#if defined(__unix__) || defined(__APPLE__)/' src/core/internal_network/socket_proxy.cpp
+
+# fix 3
+if [ "$TARGET" = "arm64" ]; then
+sed -i '' '/#include <asm-generic\/signal.h>/{
+i\
+#ifdef __linux__
+}' src/core/arm/nce/arm_nce_asm_definitions.h
+
+sed -i '' '/#include <asm-generic\/unistd.h>/{
+a\
+#endif
+}' src/core/arm/nce/arm_nce_asm_definitions.h
+fi
 
 COUNT="$(git rev-list --count HEAD)"
 APP_NAME="Eden-${COUNT}-MacOS-${TARGET}"

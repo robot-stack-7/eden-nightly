@@ -8,10 +8,13 @@ export ARCH=$(uname -m)
 BUILD_DIR=$(realpath "$1")
 APPDIR="${BUILD_DIR}/light/AppDir"
 
+mkdir -p "${APPDIR}/usr/bin"
 cd "${BUILD_DIR}"
 
-# Install base files to AppDir
-DESTDIR="${APPDIR}" ninja install
+cp -v ../dist/org.eden_emu.eden.desktop "${APPDIR}"
+cp -v ../dist/org.eden_emu.eden.svg "${APPDIR}"
+cp -v ./bin/eden "${APPDIR}/usr/bin"
+ln -sfv ./org.eden_emu.eden.svg "${APPDIR}/.DirIcon"
 
 # Prepare linuxdepoly
 curl -fsSLo ./linuxdeploy "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${ARCH}.AppImage"
@@ -29,16 +32,10 @@ export EXTRA_PLATFORM_PLUGINS="libqwayland-egl.so;libqwayland-generic.so;libqxcb
 export EXTRA_QT_MODULES="svg;waylandcompositor"
 
 # start to deploy
-NO_STRIP=1 ./linuxdeploy --appdir ./light/AppDir --plugin qt --plugin checkrt
+NO_STRIP=1 ./linuxdeploy --appdir "${APPDIR}" --plugin qt --plugin checkrt
 
 # remove libvulkan because it causes issues with gamescope
 rm -fv ./light/AppDir/usr/lib/libvulkan.so*
-
-# remove useless dev files
-find "$APPDIR/usr" -name '*.a' -type f -exec rm -fv {} \;
-rm -rf "$APPDIR/usr/include"
-rm -rf "$APPDIR/usr/lib/cmake"
-rm -rf "$APPDIR/usr/lib/pkgconfig"
 
 # Bundle libsdl3 to AppDir, needed for steamdeck
 cp /usr/lib/libSDL3.so* ./light/AppDir/usr/lib/

@@ -11,8 +11,7 @@ on:
         description: '选择要运行的编译任务'
         options:
           - all
-          - windows_x64
-          - windows_arm64
+          - windows
           - appimage
           - macos
           - android
@@ -87,8 +86,8 @@ jobs:
             runs-on: ubuntu-latest
           - target: legacy
             runs-on: ubuntu-latest
-          - target: aarch64
-            runs-on: ubuntu-24.04-arm
+#          - target: aarch64
+#            runs-on: ubuntu-24.04-arm
     continue-on-error: true
     container: ghcr.io/pkgforge-dev/archlinux:latest
     name: "Appimage (${{ matrix.target }})"
@@ -226,14 +225,23 @@ jobs:
           path: ~/.cache/sccache/
           key: ${{ steps.restore-sccache-cache.outputs.cache-primary-key }}
 
-  windows_x64:
-    if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows_x64'
+  windows:
+    if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows'
     runs-on: windows-2022
-    name: "Windows (x86_64)"
+    name: "Windows (${{ matrix.target }})"
     continue-on-error: true
+    strategy:
+      matrix:
+        include:
+           - target: x86_64
+             arch: x86_64
+             qt_arch: win64_msvc2022_64
+#           - target: x86_arm64
+#             arch: ARM64
+#             qt_arch: win64_msvc2022_arm64_cross_compiled
     env:
-      TARGET: x86_64
-      ARCH: x86_64
+      TARGET: ${{ matrix.target }}
+      ARCH: ${{ matrix.arch }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros
@@ -243,7 +251,7 @@ jobs:
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x86_64
+          arch: ${{ matrix.target }}
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -251,8 +259,8 @@ jobs:
           version: '6.9.1'
           host: 'windows'
           target: 'desktop'
-          arch: win64_msvc2022_64
-          modules: qtmultimedia qt5compat
+          arch: ${{ matrix.qt_arch }}
+          modules: qtmultimedia
 
       - name: Install vulkan-sdk
         shell: bash
@@ -277,179 +285,62 @@ jobs:
           git submodule update --init --recursive
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
 
-      - name: Restore vcpkg cache for x86_64
+      - name: Restore cpm cache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
-        id: restore-vcpkg-cache
+        id: restore-cpm-cache
         with:
           path: |
-            ${{ github.workspace }}/eden/build/vcpkg_installed
-            ${{ github.workspace }}/eden/build/externals
-            ${{ github.workspace }}/eden/.vcpkg
-          key: ${{ runner.os }}-vcpkg-x86_64-${{ github.sha }}
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-x86_64-
+            ${{ runner.os }}-cpm-${{ matrix.target }}-
 
-      - name: Restore ccache for x86_64
+      - name: Restore ccache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
         id: restore-ccache-cache
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-ccache-x86_64-${{ github.sha }}
+          key: ${{ runner.os }}-ccache-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-ccache-x86_64-
+            ${{ runner.os }}-ccache-${{ matrix.target }}-
 
-      - name: Compile Eden Windows x86_64
+      - name: Compile Eden Windows ${{ matrix.target }}
         shell: bash
         run: |
           chmod +x ./eden-windows.sh
           ./eden-windows.sh
 
-      - name: Generate installer for x86_64
+      - name: Generate installer for ${{ matrix.target }}
         shell: cmd
         run: |
           cd installer
-          "C:\Program Files (x86)\NSIS\makensis.exe" /DPRODUCT_VARIANT=x86_64 /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
+          "C:\Program Files (x86)\NSIS\makensis.exe" /DPRODUCT_VARIANT=${{ matrix.arch }} /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
           mkdir artifacts 2>nul
           move /y *.exe artifacts\
 
-      - name: Upload Eden 7z x86_64
+      - name: Upload Eden 7z ${{ matrix.target }}
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-windows-7z-x86_64
+          name: eden-windows-7z-${{ matrix.target }}
           path: eden/build/artifacts/
 
-      - name: Upload Eden installer x86_64
+      - name: Upload Eden installer ${{ matrix.target }}
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-windows-installer-x86_64
+          name: eden-windows-installer-${{ matrix.target }}
           path: installer/artifacts/
 
-      - name: Save vcpkg cache for x86_64
+      - name: Save cpm cache for ${{ matrix.target }}
         if: ${{ github.ref_name == 'main' }}
         uses: actions/cache/save@v4
         with:
           path: |
-            ${{ github.workspace }}/eden/build/vcpkg_installed
-            ${{ github.workspace }}/eden/build/externals
-            ${{ github.workspace }}/eden/.vcpkg
-          key: ${{ steps.restore-vcpkg-cache.outputs.cache-primary-key }}
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
-      - name: Save ccache for x86_64
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ steps.restore-ccache-cache.outputs.cache-primary-key }}
-          
-  windows_arm64:
-    if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows_arm64'
-    runs-on: windows-2022
-    name: "Windows (ARM64)"
-    continue-on-error: true
-    env:
-      TARGET: x86_arm64
-      ARCH: ARM64
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_COMPILERCHECK: content
-      CCACHE_SLOPPINESS: time_macros
-    steps:
-      - uses: actions/checkout@v4.2.2
-
-      - name: Set up MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: ARM64
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.9.1'
-          host: 'windows'
-          target: 'desktop'
-          arch: win64_msvc2022_arm64_cross_compiled
-          modules: qtmultimedia qt5compat
-
-      - name: Install vulkan-sdk
-        shell: bash
-        run: |
-          choco install wget ccache -y --no-progress
-          mkdir -p D:/a/_temp
-          VULKAN_URL="https://sdk.lunarg.com/sdk/download/1.4.313.1/windows/vulkansdk-windows-X64-1.4.313.1.exe"
-          wget -q --retry-connrefused --tries=10 "$VULKAN_URL" -O D:/a/_temp/vulkan.exe
-          D:/a/_temp/vulkan.exe --accept-licenses --default-answer --confirm-command install
-          echo "VULKAN_SDK=C:/VulkanSDK/1.4.313.1" >> $GITHUB_ENV
-          echo "PATH=C:/VulkanSDK/1.4.313.1/Bin:$PATH" >> $GITHUB_ENV
-
-      - name: Pull Eden with submodules
-        shell: bash
-        run: |
-          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-          fi
-          cd ./eden
-          git submodule update --init --recursive
-          echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
-
-      - name: Restore vcpkg cache for ARM64
-        uses: actions/cache/restore@v4
-        id: restore-vcpkg-cache
-        with:
-          path: |
-            ${{ github.workspace }}/eden/build/vcpkg_installed
-            ${{ github.workspace }}/eden/build/externals
-            ${{ github.workspace }}/eden/.vcpkg
-          key: ${{ runner.os }}-vcpkg-x86_arm64-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-x86_arm64-
-
-      - name: Restore ccache for ARM64
-        uses: actions/cache/restore@v4
-        id: restore-ccache-cache
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-ccache-x86_arm64-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-x86_arm64-
-
-      - name: Compile Eden Windows ARM64
-        shell: bash
-        run: |
-          chmod +x ./eden-windows.sh
-          ./eden-windows.sh
-
-      - name: Generate installer for ARM64
-        shell: cmd
-        run: |
-          cd installer
-          "C:\Program Files (x86)\NSIS\makensis.exe" /DPRODUCT_VARIANT=ARM64 /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
-          mkdir artifacts 2>nul
-          move /y *.exe artifacts\
-
-      - name: Upload Eden 7z ARM64
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: eden-windows-7z-x86_arm64
-          path: eden/build/artifacts/
-
-      - name: Upload Eden installer ARM64
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: eden-windows-installer-x86_arm64
-          path: installer/artifacts/
-
-      - name: Save vcpkg cache for ARM64
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ${{ github.workspace }}/eden/build/vcpkg_installed
-            ${{ github.workspace }}/eden/build/externals
-            ${{ github.workspace }}/eden/.vcpkg
-          key: ${{ steps.restore-vcpkg-cache.outputs.cache-primary-key }}
-
-      - name: Save ccache for ARM64
+      - name: Save ccache for ${{ matrix.target }}
         if: ${{ github.ref_name == 'main' }}
         uses: actions/cache/save@v4
         with:
@@ -564,7 +455,7 @@ jobs:
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
     name: "release"
-    needs: [info, appimage, windows_x64, windows_arm64, macos, android, freebsd]
+    needs: [info, appimage, windows, android, freebsd]
     permissions:
       actions: read
       security-events: write
@@ -619,17 +510,17 @@ jobs:
         with:
           name: eden-legacy-light-appimage
 
-      - uses: actions/download-artifact@v4.3.0
-        with:
-          name: eden-aarch64-mesa-appimage
+#      - uses: actions/download-artifact@v4.3.0
+#        with:
+#          name: eden-aarch64-mesa-appimage
 
-      - uses: actions/download-artifact@v4.3.0
-        with:
-          name: eden-aarch64-mesa-appbundle
+#      - uses: actions/download-artifact@v4.3.0
+#        with:
+#          name: eden-aarch64-mesa-appbundle
 
-      - uses: actions/download-artifact@v4.3.0
-        with:
-          name: eden-aarch64-light-appimage
+#      - uses: actions/download-artifact@v4.3.0
+#        with:
+#          name: eden-aarch64-light-appimage
 
       - uses: actions/download-artifact@v4.3.0
         with:

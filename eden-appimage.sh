@@ -74,7 +74,6 @@ DATE="$(date +"%d_%m_%Y")"
 mkdir build
 cd build
 cmake .. -GNinja \
-    -DYUZU_USE_BUNDLED_VCPKG=OFF \
     -DYUZU_USE_BUNDLED_QT=OFF \
     -DYUZU_TESTS=OFF \
     -DYUZU_CHECK_SUBMODULES=OFF \
@@ -84,8 +83,6 @@ cmake .. -GNinja \
     -DUSE_DISCORD_PRESENCE=OFF \
     -DYUZU_CMD=OFF \
     -DYUZU_ROOM_STANDALONE=OFF \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-    -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_SYSTEM_PROCESSOR="$(uname -m)" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_EXE_LINKER_FLAGS="-Wl,--as-needed" \
@@ -96,6 +93,7 @@ cmake .. -GNinja \
     ${CMAKE_CXX_FLAGS:+-DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS"} \
     ${CMAKE_C_FLAGS:+-DCMAKE_C_FLAGS="$CMAKE_C_FLAGS"}
 ninja
+strip -s bin/*
 
 if [ "$1" != 'aarch64' ]; then
     ccache -s -v

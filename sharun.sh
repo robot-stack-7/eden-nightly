@@ -10,20 +10,17 @@ SHARUN="https://github.com/VHSgunzo/sharun/releases/latest/download/sharun-${ARC
 BUILD_DIR=$(realpath "$1")
 APPDIR="${BUILD_DIR}/mesa/AppDir"
 
-cd "${BUILD_DIR}"
-sudo ninja install
-
 mkdir -p "${APPDIR}"
 cd "${APPDIR}"
 
-cp -v /usr/share/applications/org.eden_emu.eden.desktop ./eden.desktop
-cp -v /usr/share/icons/hicolor/scalable/apps/org.eden_emu.eden.svg ./eden.svg
-ln -sfv ./eden.svg ./.DirIcon
+cp -v ../../../dist/org.eden_emu.eden.desktop .
+cp -v ../../../dist/org.eden_emu.eden.svg .
+ln -sfv ./org.eden_emu.eden.svg ./.DirIcon
 
 wget --retry-connrefused --tries=30 "$SHARUN" -O ./sharun-aio
 chmod +x ./sharun-aio
 xvfb-run -a ./sharun-aio l -p -v -e -s -k \
-    /usr/bin/eden \
+    "${BUILD_DIR}"/bin/eden \
     /usr/lib/lib*GL*.so* \
     /usr/lib/dri/* \
     /usr/lib/vdpau/* \
