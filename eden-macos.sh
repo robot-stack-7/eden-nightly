@@ -7,15 +7,7 @@ else
     export LIBVULKAN_PATH="/usr/local/lib/libvulkan.1.dylib"
 fi
 
-# Clone Eden, fallback to mirror if upstream repo fails to clone
-if ! git clone https://git.eden-emu.dev/eden-emu/eden.git ./eden; then
-	echo "Using mirror instead..."
-	rm -rf ./eden || true
-	git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-fi
-
 cd ./eden
-git submodule update --init --recursive
 
 # fix 1
 sed -i '' 's/VideoCommon::Offset3D(0, 0, 0)/VideoCommon::Offset3D{0, 0, 0}/g' src/video_core/renderer_vulkan/vk_texture_cache.cpp
@@ -45,6 +37,8 @@ mkdir build
 cd build
 cmake .. -GNinja \
     -DYUZU_TESTS=OFF \
+	-DBUILD_TESTING=OFF \
+ 	-DDYNARMIC_TESTS=OFF \
     -DYUZU_USE_BUNDLED_QT=OFF \
     -DENABLE_QT_TRANSLATION=ON \
     -DYUZU_ENABLE_LTO=ON \

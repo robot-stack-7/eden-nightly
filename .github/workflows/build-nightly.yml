@@ -100,6 +100,32 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install dependencies
+        run: |
+          chmod +x ./linux-dependencies.sh
+          ./linux-dependencies.sh
+
+      - name: Pull Eden with submodules
+        run: |
+          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+            echo "Using mirror instead..."
+            rm -rf ./eden || true
+            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
+          fi
+          cd ./eden
+          git submodule update --init --recursive
+
+      - name: Restore cpm cache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-cpm-cache
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cpm-${{ matrix.target }}-
+
       - name: Restore ccache for ${{ matrix.target }}
         if: ${{ matrix.target != 'aarch64' }}
         uses: actions/cache/restore@v4
@@ -119,11 +145,6 @@ jobs:
           key: ${{ runner.os }}-sccache-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-sccache-${{ matrix.target }}-
-
-      - name: Install dependencies
-        run: |
-          chmod +x ./linux-dependencies.sh
-          ./linux-dependencies.sh
 
       - name: Compile Eden ${{ matrix.target }}
         run: |
@@ -147,6 +168,15 @@ jobs:
         with:
           name: eden-${{ matrix.target}}-light-appimage
           path: light
+
+      - name: Save cpm cache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
       - name: Save ccache for ${{ matrix.target }}
         if: ${{ matrix.target != 'aarch64' && github.ref_name == 'main' }}
@@ -198,6 +228,17 @@ jobs:
           cd ./eden
           git submodule update --init --recursive
 
+      - name: Restore cpm cache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-cpm-cache
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ runner.os }}-android-cpm-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-android-cpm-${{ matrix.target }}-
+
       - name: Restore sccache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
         id: restore-sccache-cache
@@ -217,6 +258,15 @@ jobs:
         with:
           name: eden-android-${{ matrix.target }}
           path: eden/src/android/artifacts/
+
+      - name: Save cpm cache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
       - name: Save sccache for ${{ matrix.target }}
         if: ${{ github.ref_name == 'main' }}
@@ -348,7 +398,7 @@ jobs:
           key: ${{ steps.restore-ccache-cache.outputs.cache-primary-key }}
 
   macos:
-    if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'macos'
+    if: github.event.inputs.job_to_run == 'macos'
     runs-on: ${{ matrix.runs-on }}
     name: "MacOS (${{ matrix.target }})"
     strategy:
@@ -366,6 +416,27 @@ jobs:
       CCACHE_SLOPPINESS: time_macros
     steps:
       - uses: actions/checkout@v4
+
+      - name: Pull Eden with submodules
+        run: |
+          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+            echo "Using mirror instead..."
+            rm -rf ./eden || true
+            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
+          fi
+          cd ./eden
+          git submodule update --init --recursive
+
+      - name: Restore cpm cache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-cpm-cache
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cpm-${{ matrix.target }}-
 
       - name: Restore ccache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
@@ -391,6 +462,15 @@ jobs:
           name: eden-macos-${{ matrix.target }}
           path: eden/build/artifacts/
 
+      - name: Save cpm cache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
+
       - name: Save ccache for ${{ matrix.target }}
         if: ${{ github.ref_name == 'main' }}
         uses: actions/cache/save@v4
@@ -411,15 +491,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
-
-      - name: Restore ccache
-        uses: actions/cache/restore@v4
-        id: restore-ccache-cache
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: FreeBSD-ccache-${{ github.sha }}
-          restore-keys: FreeBSD-ccache-
-
+        
       - name: Pull Eden with submodules
         run: |
           if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
@@ -428,7 +500,25 @@ jobs:
             git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
           fi
           cd ./eden
-          git submodule update --init --recursive $(awk '/path/ && !/vcpkg/ && !/libusb/ { print $3 }' .gitmodules)
+          git submodule update --init --recursive
+
+      - name: Restore cpm cache
+        uses: actions/cache/restore@v4
+        id: restore-cpm-cache
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: FreeBSD-cpm-${{ github.sha }}
+          restore-keys: FreeBSD-cpm-
+
+      - name: Restore ccache
+        uses: actions/cache/restore@v4
+        id: restore-ccache-cache
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: FreeBSD-ccache-${{ github.sha }}
+          restore-keys: FreeBSD-ccache-
 
       - name: Compile Eden FreeBSD
         uses: vmactions/freebsd-vm@v1.2.1
@@ -445,6 +535,15 @@ jobs:
           name: eden-freebsd
           path: eden/build/artifacts/
 
+      - name: Save cpm cache
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
+
       - name: Save ccache
         if: ${{ github.ref_name == 'main' }}
         uses: actions/cache/save@v4
@@ -455,7 +554,7 @@ jobs:
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
     name: "release"
-    needs: [info, appimage, windows, android, freebsd]
+    needs: [info, appimage, windows, macos, android, freebsd]
     permissions:
       actions: read
       security-events: write
@@ -539,6 +638,7 @@ jobs:
           name: eden-windows-7z-x86_64
 
       - uses: actions/download-artifact@v4.3.0
+        continue-on-error: true
         with:
           name: eden-windows-7z-x86_arm64
 
@@ -547,6 +647,7 @@ jobs:
           name: eden-windows-installer-x86_64
 
       - uses: actions/download-artifact@v4.3.0
+        continue-on-error: true
         with:
           name: eden-windows-installer-x86_arm64
 
