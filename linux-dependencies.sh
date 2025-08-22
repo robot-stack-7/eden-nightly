@@ -1,78 +1,45 @@
 #!/bin/sh
 
-set -ex
+set -eux
 ARCH="$(uname -m)"
 
 echo "Installing build dependencies..."
 echo "---------------------------------------------------------------"
 pacman -Syu --noconfirm \
-	aom \
 	base-devel \
-	boost \
-	boost-libs \
 	catch2 \
-	clang \
 	cmake \
  	ccache \
-	curl \
-	dav1d \
-	desktop-file-utils \
-	doxygen \
-	enet \
-	ffmpeg \
-	fuse2 \
-	fmt \
+	ffnvcodec-headers \
 	gamemode \
 	git \
 	glslang \
-	glfw \
-	glu \
-	hidapi \
+ 	inetutils \
  	jq \
-	libass \
-	libdecor \
-	libdisplay-info \
-	libfdk-aac \
-	libopusenc \
- 	libtheora \
 	libva \
+ 	libvdpau \
 	libvpx \
-	libxi \
-	libxkbcommon-x11 \
-	libxss \
-	libzip \
-	mbedtls \
-	mbedtls2 \
-	mesa \
-	meson \
 	nasm \
 	ninja \
-	nlohmann-json \
 	numactl \
 	patchelf \
-	pipewire-audio \
 	pulseaudio \
 	pulseaudio-alsa \
 	python-pip \
-	qt6-base \
 	qt6ct \
-	qt6-multimedia \
 	qt6-tools \
 	qt6-wayland \
- 	qt6-5compat \
- 	rapidjson \
-  sccache \
-	sdl2 \
+  	sccache \
  	sdl3 \
 	strace \
 	unzip \
 	vulkan-headers \
+ 	vulkan-mesa-layers \
 	vulkan-nouveau \
 	vulkan-radeon \
 	wget \
  	wireless_tools \
-	x264 \
-	x265 \
+  	xcb-util-cursor \
 	xcb-util-image \
 	xcb-util-renderutil \
 	xcb-util-wm \
@@ -80,11 +47,10 @@ pacman -Syu --noconfirm \
 	zip \
 	zsync
 
-
 case "$ARCH" in
 	'x86_64')  
 		PKG_TYPE='x86_64.pkg.tar.zst'
-		pacman -Syu --noconfirm vulkan-intel haskell-gnutls gcc svt-av1
+		pacman -Syu --noconfirm vulkan-intel haskell-gnutls svt-av1
 		;;
 	'aarch64') 
 		PKG_TYPE='aarch64.pkg.tar.xz'
@@ -108,7 +74,6 @@ echo "---------------------------------------------------------------"
 wget -q --retry-connrefused --tries=30 "$LLVM_URL" -O ./llvm-libs.pkg.tar.zst
 wget -q --retry-connrefused --tries=30 "$QT6_URL" -O ./qt6-base-iculess.pkg.tar.zst
 wget -q --retry-connrefused --tries=30 "$LIBXML_URL" -O ./libxml2-iculess.pkg.tar.zst
-wget -q --retry-connrefused --tries=30 "$FFMPEG_URL" -O ./ffmpeg-mini.pkg.tar.zst
 wget -q --retry-connrefused --tries=30 "$OPUS_URL" -O ./opus-nano.pkg.tar.zst
 
 if [ "$ARCH" = 'x86_64' ]; then

@@ -137,7 +137,7 @@ mv -v "${APPBUNDLE}"* bundle/
 
 echo "Generating AppImage without mesa"
 LIGHT_APPIMAGE="Eden-${COUNT}-${TARGET}-light-${ARCH}.AppImage"
-./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B8 \
+./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B32 \
 --header uruntime -i ./eden/build/light/AppDir -o "$LIGHT_APPIMAGE"
 
 echo "Generating zsync file for $LIGHT_APPIMAGE"
