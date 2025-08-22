@@ -8,7 +8,7 @@ cd ./eden
 git config --global --add safe.directory .
 COUNT="$(git rev-list --count HEAD)"
 
-mkdir build
+mkdir -p build
 cd build
 cmake .. -GNinja \
     -DYUZU_TESTS=OFF \
