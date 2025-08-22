@@ -32,7 +32,7 @@ NO_STRIP=1 ./linuxdeploy \
   -e ./bin/eden \
   -d ../dist/org.eden_emu.eden.desktop \
   -i ../dist/org.eden_emu.eden.svg \
-  -l /usr/lib/libSDL3.so* \
+  -l /usr/lib/libSDL3.so.0 \
   --plugin qt \
   --plugin checkrt
 
