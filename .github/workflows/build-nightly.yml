@@ -554,7 +554,7 @@ jobs:
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
     name: "release"
-    needs: [info, appimage, windows, macos, android, freebsd]
+    needs: [info, appimage, windows, android, freebsd]
     permissions:
       actions: read
       security-events: write
