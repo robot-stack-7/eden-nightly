@@ -115,7 +115,7 @@ echo "Adding update information \"$AI_UPINFO\" to runtime..."
 # Turn AppDir into appimage and appbundle, upload seperately
 echo "Generating AppImage with mesa"
 MESA_APPIMAGE="Eden-${COUNT}-${TARGET}-${ARCH}.AppImage"
-./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B8 \
+./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B6 \
 --header uruntime -i ./eden/build/mesa/AppDir -o "$MESA_APPIMAGE"
 
 echo "Generating zsync file for $MESA_APPIMAGE"
@@ -127,7 +127,7 @@ mv -v "${MESA_APPIMAGE}"* mesa/
 echo "Generating AppBundle...(Go runtime)"
 APPBUNDLE="Eden-${COUNT}-${TARGET}-${ARCH}.dwfs.AppBundle"
 ln -sfv ./eden/build/mesa/AppDir/eden.svg ./eden/build/mesa/AppDir/.DirIcon.svg
-./pelf --add-appdir ./eden/build/mesa/AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B8" --output-to "$APPBUNDLE" --add-updinfo "$AB_UPINFO"
+./pelf --add-appdir ./eden/build/mesa/AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B6" --output-to "$APPBUNDLE" --add-updinfo "$AB_UPINFO"
 
 echo "Generating zsync file for $APPBUNDLE"
 zsyncmake -v "$APPBUNDLE" -u "$APPBUNDLE"
@@ -137,7 +137,7 @@ mv -v "${APPBUNDLE}"* bundle/
 
 echo "Generating AppImage without mesa"
 LIGHT_APPIMAGE="Eden-${COUNT}-${TARGET}-light-${ARCH}.AppImage"
-./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B32 \
+./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B6 \
 --header uruntime -i ./eden/build/light/AppDir -o "$LIGHT_APPIMAGE"
 
 echo "Generating zsync file for $LIGHT_APPIMAGE"
