@@ -86,8 +86,8 @@ jobs:
             runs-on: ubuntu-latest
           - target: legacy
             runs-on: ubuntu-latest
-#          - target: aarch64
-#            runs-on: ubuntu-24.04-arm
+          - target: aarch64
+            runs-on: ubuntu-24.04-arm
     continue-on-error: true
     container: ghcr.io/pkgforge-dev/archlinux:latest
     name: "Appimage (${{ matrix.target }})"
@@ -398,7 +398,7 @@ jobs:
           key: ${{ steps.restore-ccache-cache.outputs.cache-primary-key }}
 
   macos:
-    if: github.event.inputs.job_to_run == 'macos'
+    if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'macos'
     runs-on: ${{ matrix.runs-on }}
     name: "MacOS (${{ matrix.target }})"
     strategy:
@@ -449,7 +449,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install --formula --quiet autoconf automake boost ccache cmake fmt glslang hidapi libiconv libtool nasm nlohmann-json qt@6 sdl2 speexdsp zlib Catch2 vulkan-loader
+          brew install --formula --quiet autoconf automake boost ccache cmake glslang hidapi libiconv libtool nasm qt@6 speexdsp vulkan-loader
 
       - name: Compile Eden MacOS (${{ matrix.target }})
         run: |
@@ -609,17 +609,17 @@ jobs:
         with:
           name: eden-legacy-light-appimage
 
-#      - uses: actions/download-artifact@v4.3.0
-#        with:
-#          name: eden-aarch64-mesa-appimage
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: eden-aarch64-mesa-appimage
 
-#      - uses: actions/download-artifact@v4.3.0
-#        with:
-#          name: eden-aarch64-mesa-appbundle
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: eden-aarch64-mesa-appbundle
 
-#      - uses: actions/download-artifact@v4.3.0
-#        with:
-#          name: eden-aarch64-light-appimage
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: eden-aarch64-light-appimage
 
       - uses: actions/download-artifact@v4.3.0
         with:
@@ -637,32 +637,27 @@ jobs:
         with:
           name: eden-windows-7z-x86_64
 
-      - uses: actions/download-artifact@v4.3.0
-        continue-on-error: true
-        with:
-          name: eden-windows-7z-x86_arm64
+#      - uses: actions/download-artifact@v4.3.0
+#        with:
+#          name: eden-windows-7z-x86_arm64
 
       - uses: actions/download-artifact@v4.3.0
         with:
           name: eden-windows-installer-x86_64
 
-      - uses: actions/download-artifact@v4.3.0
-        continue-on-error: true
-        with:
-          name: eden-windows-installer-x86_arm64
+#      - uses: actions/download-artifact@v4.3.0
+#        with:
+#          name: eden-windows-installer-x86_arm64
 
       - uses: actions/download-artifact@v4.3.0
-        continue-on-error: true
         with:
           name: eden-macos-x86_64
 
       - uses: actions/download-artifact@v4.3.0
-        continue-on-error: true
         with:
           name: eden-macos-arm64
 
       - uses: actions/download-artifact@v4.3.0
-        continue-on-error: true
         with:
           name: eden-freebsd
 

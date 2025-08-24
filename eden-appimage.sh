@@ -15,26 +15,26 @@ case "$1" in
         echo "Making Eden Optimized Build for Steam Deck"
         CMAKE_CXX_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -w"
         CMAKE_C_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -w"
-	YUZU_USE_PRECOMPILED_HEADERS=OFF
- 	PROFILE="steamdeck"
-	CCACHE="ccache"
+		YUZU_USE_PRECOMPILED_HEADERS=OFF
+ 		PROFILE="steamdeck"
+		CCACHE="ccache"
         TARGET="Steamdeck"
         ;;
     rog)
         echo "Making Eden Optimized Build for ROG ALLY X"
         CMAKE_CXX_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -w"
         CMAKE_C_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -w"
-	YUZU_USE_PRECOMPILED_HEADERS=OFF
- 	PROFILE="steamdeck"
-	CCACHE="ccache"
+		YUZU_USE_PRECOMPILED_HEADERS=OFF
+ 		PROFILE="steamdeck"
+		CCACHE="ccache"
         TARGET="ROG_ALLY"
         ;;
     common)
         echo "Making Eden Optimized Build for Modern CPUs"
         CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -w"
         CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -w"
-	YUZU_USE_PRECOMPILED_HEADERS=OFF
-	CCACHE="ccache"
+		YUZU_USE_PRECOMPILED_HEADERS=OFF
+		CCACHE="ccache"
         ARCH="${ARCH}_v3"
         TARGET="Common"
         ;;
@@ -42,15 +42,16 @@ case "$1" in
         echo "Making Eden Optimized Build for Legacy CPUs"
         CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -w"
         CMAKE_C_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -w"
-	YUZU_USE_PRECOMPILED_HEADERS=OFF
-	CCACHE="ccache"
+		YUZU_USE_PRECOMPILED_HEADERS=OFF
+		CCACHE="ccache"
         TARGET="Legacy"
         ;;
     aarch64)
         echo "Making Eden Optimized Build for AArch64"
         CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -w"
         CMAKE_C_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -w"
-	CCACHE="sccache"	
+		OPENSSL="OFF"
+		CCACHE="sccache"	
         TARGET="Linux"
         ;;
 esac
@@ -79,6 +80,7 @@ cmake .. -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_EXE_LINKER_FLAGS="-Wl,--as-needed" \
     -DYUZU_SYSTEM_PROFILE="${PROFILE:-}" \
+	-DYUZU_USE_BUNDLED_OPENSSL="${OPENSSL:-}" \
     -DCMAKE_C_COMPILER_LAUNCHER="${CCACHE:-}" \
     -DCMAKE_CXX_COMPILER_LAUNCHER="${CCACHE:-}" \
     ${YUZU_USE_PRECOMPILED_HEADERS:+-DYUZU_USE_PRECOMPILED_HEADERS=$YUZU_USE_PRECOMPILED_HEADERS} \

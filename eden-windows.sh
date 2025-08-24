@@ -8,33 +8,8 @@ cd ./eden
 declare -a EXTRA_CMAKE_FLAGS=()
 
 if [[ "${ARCH}" == "ARM64" ]]; then
-    # 为ARM64架构添加特定的编译参数
-    EXTRA_CMAKE_FLAGS+=(
-        -DYUZU_USE_BUNDLED_SDL2=OFF
-        -DYUZU_USE_EXTERNAL_SDL2=ON
-    )
-
-    # ... (适用于ARM64的sed命令)
-    sed -i 's|set(package_base_url "https://github.com/eden-emulator/")|set(package_base_url "https://github.com/pflyly/eden-nightly/")|' CMakeModules/DownloadExternals.cmake
-    sed -i 's|set(package_repo "ext-windows-bin/raw/master/")|set(package_repo "raw/refs/heads/main/")|' CMakeModules/DownloadExternals.cmake
-    sed -i 's|set(package_extension ".7z")|set(package_extension ".zip")|' CMakeModules/DownloadExternals.cmake
-    sed -i '
-    /#elif defined(ARCHITECTURE_x86_64)/{
-        N
-        /asm volatile("mfence\\n\\tlfence\\n\\t" : : : "memory");/a\
-    #elif defined(_MSC_VER) && defined(ARCHITECTURE_arm64)\
-                            _Memory_barrier();
-    }
-    /#elif defined(ARCHITECTURE_x86_64)/{
-        N
-        /asm volatile("mfence\\n\\t" : : : "memory");/a\
-    #elif defined(_MSC_VER) && defined(ARCHITECTURE_arm64)\
-                            _Memory_barrier();
-    }
-    ' src/core/arm/dynarmic/dynarmic_cp15.cpp
-    sed -i 's/list(APPEND CMAKE_PREFIX_PATH "${Qt6_DIR}")/list(PREPEND CMAKE_PREFIX_PATH "${Qt6_DIR}")/' CMakeLists.txt
-    sed -i '/#include <boost\/asio.hpp>/a #include <boost/version.hpp>' src/core/debugger/debugger.cpp
-
+    # Not working, leave it here for future test
+    # git apply -p1 ../patches/windows_arm64.patch
 elif [[ "${ARCH}" == "x86_64" ]]; then
     # 为 x86_64 架构开启针对性的CPU优化 (AVX2) 和 C++异常处理 (/EHsc)
     echo "Enabling AVX2 optimizations and C++ exception handling for native x86_64 performance."
