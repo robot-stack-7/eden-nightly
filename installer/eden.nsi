@@ -1,6 +1,11 @@
 ; Copyright Dolphin Emulator Project / Azahar Emulator Project / eden Emulator Project
 ; Licensed under GPLv3
 
+; Require /DPRODUCT_TOOLCHAIN=<release-name> to makensis.
+!ifndef PRODUCT_TOOLCHAIN
+  !error "PRODUCT_TOOLCHAIN must be defined"
+!endif
+
 ; Require /DPRODUCT_VERSION=<release-name> to makensis.
 !ifndef PRODUCT_VERSION
   !error "PRODUCT_VERSION must be defined"
@@ -55,7 +60,7 @@ Var OpenLatestCheckbox
 Var OpenLatest
 
 Name "${PRODUCT_NAME}"
-OutFile "Eden-${PRODUCT_VERSION}-Windows-${PRODUCT_VARIANT}-Installer.exe"
+OutFile "Eden-${PRODUCT_VERSION}-Windows-${PRODUCT_TOOLCHAIN}-${PRODUCT_VARIANT}-Installer.exe"
 BrandingText "${PRODUCT_NAME} Installer v${PRODUCT_VERSION} (${PRODUCT_VARIANT})"
 SetCompressor /SOLID lzma
 ShowInstDetails show

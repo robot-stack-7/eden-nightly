@@ -15,7 +15,8 @@ This repository provides **unofficial nightly releases** of **Eden** for the fol
 - **Linux** (`x86_64`, `aarch64`)
 - **FreeBSD** (`amd64`)
 - **Android**
-- **Windows** (`x86_64`)
+- **Windows-MSVC** (`x86_64`)
+- **Windows-MSYS2** (`x86_64`)
 - **MacOS** (`x86_64`, `arm64`)
 
 >[!WARNING]
@@ -88,7 +89,5 @@ It is possible that this appimage may fail to work with appimagelauncher, I reco
 * [AM](https://github.com/ivan-hc/AM) `am -i eden-nightly` or `appman -i eden-nightly`
 
 * [dbin](https://github.com/xplshn/dbin) `dbin install eden-nightly.appimage`
-
-* [soar](https://github.com/pkgforge/soar) `soar install eden-nightly`
 
 This appimage works without fuse2 as it can use fuse3 instead, it can also work without fuse at all thanks to the [uruntime](https://github.com/VHSgunzo/uruntime)

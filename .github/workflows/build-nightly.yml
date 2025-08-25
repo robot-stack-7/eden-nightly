@@ -278,19 +278,29 @@ jobs:
   windows:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows'
     runs-on: windows-2022
-    name: "Windows (${{ matrix.target }})"
+    name: "Windows ${{ matrix.toolchain }} (${{ matrix.arch }})"
     continue-on-error: true
     strategy:
       matrix:
         include:
-           - target: x86_64
+           - toolchain: msvc
+             target: x86_64
              arch: x86_64
              qt_arch: win64_msvc2022_64
-#           - target: x86_arm64
+             
+#           - toolchain: msvc
+#             target: x86_arm64
 #             arch: ARM64
 #             qt_arch: win64_msvc2022_arm64_cross_compiled
+
+           - toolchain: msys2
+             target: MINGW64
+             arch: x86_64
+    defaults:
+      run:
+        shell: ${{ matrix.toolchain == 'msys2' && 'msys2 {0}' || 'bash {0}' }}
     env:
-      TARGET: ${{ matrix.target }}
+      TOOLCHAIN: ${{ matrix.toolchain }}
       ARCH: ${{ matrix.arch }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
@@ -299,11 +309,24 @@ jobs:
       - uses: actions/checkout@v4.2.2
 
       - name: Set up MSVC
+        if: ${{ matrix.toolchain == 'msvc' }}
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.target }}
 
+      - name: Set up MSYS2
+        if: ${{ matrix.toolchain == 'msys2' }}
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.target }}
+          update: false
+          cache: false
+          install: git make p7zip autoconf libtool autoconf-archive base-devel zip unzip automake-wrapper automake
+          pacboy: >-
+            toolchain:p ccache:p cmake:p ninja:p ffmpeg:p lz4:p qt6-base:p qt6-tools:p qt6-translations:p qt6-svg:p glslang:p boost:p zstd:p rapidjson:p python-pip:p nlohmann-json:p libusb:p
+
       - name: Install Qt
+        if: ${{ matrix.toolchain == 'msvc' }}
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.9.1'
@@ -313,7 +336,7 @@ jobs:
           modules: qtmultimedia
 
       - name: Install vulkan-sdk
-        shell: bash
+        if: ${{ matrix.toolchain == 'msvc' }}
         run: |
           choco install wget ccache -y --no-progress
           mkdir -p D:/a/_temp
@@ -324,7 +347,7 @@ jobs:
           echo "PATH=C:/VulkanSDK/1.4.313.1/Bin:$PATH" >> $GITHUB_ENV
 
       - name: Pull Eden with submodules
-        shell: bash
+        if: ${{ matrix.toolchain == 'msvc' }}
         run: |
           if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
             echo "Using mirror instead..."
@@ -335,53 +358,64 @@ jobs:
           git submodule update --init --recursive
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
 
-      - name: Restore cpm cache for ${{ matrix.target }}
+      - name: Pull Eden with submodules
+        if: ${{ matrix.toolchain == 'msys2' }}
+        run: |
+          if ! git clone -b "gcc/clang_support" --single-branch 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+            echo "Using mirror instead..."
+            rm -rf ./eden || true
+            git clone -b "gcc/clang_support" --single-branch 'https://github.com/pflyly/eden-mirror.git' ./eden
+          fi
+          cd ./eden
+          git submodule update --init --recursive
+          echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
+
+      - name: Restore cpm cache
         uses: actions/cache/restore@v4
         id: restore-cpm-cache
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
             ${{ github.workspace }}/eden/build/_deps/*-build
-          key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
+          key: ${{ runner.os }}-cpm-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-cpm-${{ matrix.target }}-
+            ${{ runner.os }}-cpm-${{ matrix.toolchain }}-${{ matrix.arch }}-
 
-      - name: Restore ccache for ${{ matrix.target }}
+      - name: Restore ccache
         uses: actions/cache/restore@v4
         id: restore-ccache-cache
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-ccache-${{ matrix.target }}-${{ github.sha }}
+          key: ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-ccache-${{ matrix.target }}-
+            ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-
 
-      - name: Compile Eden Windows ${{ matrix.target }}
-        shell: bash
+      - name: Compile Eden Windows
         run: |
           chmod +x ./eden-windows.sh
           ./eden-windows.sh
 
-      - name: Generate installer for ${{ matrix.target }}
+      - name: Generate installer
         shell: cmd
         run: |
           cd installer
-          "C:\Program Files (x86)\NSIS\makensis.exe" /DPRODUCT_VARIANT=${{ matrix.arch }} /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
+          "C:\Program Files (x86)\NSIS\makensis.exe" /DPRODUCT_TOOLCHAIN=${{ matrix.toolchain }} /DPRODUCT_VARIANT=${{ matrix.arch }} /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
           mkdir artifacts 2>nul
           move /y *.exe artifacts\
 
-      - name: Upload Eden 7z ${{ matrix.target }}
+      - name: Upload Eden 7z
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-windows-7z-${{ matrix.target }}
+          name: eden-windows-${{ matrix.toolchain }}-7z-${{ matrix.arch }}
           path: eden/build/artifacts/
 
-      - name: Upload Eden installer ${{ matrix.target }}
+      - name: Upload Eden installer
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-windows-installer-${{ matrix.target }}
+          name: eden-windows-${{ matrix.toolchain }}-installer-${{ matrix.arch }}
           path: installer/artifacts/
 
-      - name: Save cpm cache for ${{ matrix.target }}
+      - name: Save cpm cache
         if: ${{ github.ref_name == 'main' }}
         uses: actions/cache/save@v4
         with:
@@ -390,7 +424,7 @@ jobs:
             ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
-      - name: Save ccache for ${{ matrix.target }}
+      - name: Save ccache
         if: ${{ github.ref_name == 'main' }}
         uses: actions/cache/save@v4
         with:
@@ -554,7 +588,7 @@ jobs:
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
     name: "release"
-    needs: [info, appimage, windows, android, freebsd]
+    needs: [info, appimage, windows, macos, android, freebsd]
     permissions:
       actions: read
       security-events: write
@@ -635,20 +669,28 @@ jobs:
 
       - uses: actions/download-artifact@v4.3.0
         with:
-          name: eden-windows-7z-x86_64
+          name: eden-windows-msvc-7z-x86_64
 
 #      - uses: actions/download-artifact@v4.3.0
 #        with:
-#          name: eden-windows-7z-x86_arm64
+#          name: eden-windows-msvc-7z-ARM64
 
       - uses: actions/download-artifact@v4.3.0
         with:
-          name: eden-windows-installer-x86_64
+          name: eden-windows-msvc-installer-x86_64
 
 #      - uses: actions/download-artifact@v4.3.0
 #        with:
-#          name: eden-windows-installer-x86_arm64
+#          name: eden-windows-msvc-installer-ARM64
 
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: eden-windows-msys2-7z-x86_64
+          
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: eden-windows-msys2-installer-x86_64
+          
       - uses: actions/download-artifact@v4.3.0
         with:
           name: eden-macos-x86_64

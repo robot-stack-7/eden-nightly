@@ -13,7 +13,7 @@ patch -p1 < ../patches/macos_arm64.patch
 COUNT="$(git rev-list --count HEAD)"
 APP_NAME="Eden-${COUNT}-MacOS-${TARGET}"
 
-mkdir build
+mkdir -p build
 cd build
 cmake .. -GNinja \
     -DYUZU_TESTS=OFF \

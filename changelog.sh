@@ -83,10 +83,14 @@ echo "| Linux (AppBundle) | **AppImage alternative**<br>────────
 [\`aarch64 (Experimental)\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Linux-aarch64.dwfs.AppBundle) |" >> "$CHANGELOG_FILE"
 echo "| FreeBSD (Experimental) | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-amd64.tar.xz) |" >> "$CHANGELOG_FILE"
 echo "| Android | [\`Replace\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Replace.apk)<br><br>[\`Coexist\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Coexist.apk)<br><br>[\`Optimised\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised.apk) |" >> "$CHANGELOG_FILE"
-echo "| Windows | **7z**<br>────────────────<br>\
-[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-x86_64.7z) | \
+echo "| Windows (MSVC) | **7z**<br>────────────────<br>\
+[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-x86_64.7z) | \
 **Installer**<br>────────────────<br>\
-[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-x86_64-Installer.exe) |" >> "$CHANGELOG_FILE"
+[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-x86_64-Installer.exe) |" >> "$CHANGELOG_FILE"
+echo "| Windows (MSYS2) | **7z**<br>────────────────<br>\
+[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-27598-Windows-msys2-x86_64.7z) | \
+**Installer**<br>────────────────<br>\
+[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-27598-Windows-msys2-x86_64-Installer.exe) |" >> "$CHANGELOG_FILE"
 echo "| MacOS (Experimental) | [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-MacOS-arm64.7z)<br><br>[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-MacOS-x86_64.7z) |" >> "$CHANGELOG_FILE"
 echo "| [Source Code](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Source-Code.7z) | |" >> "$CHANGELOG_FILE"
 
