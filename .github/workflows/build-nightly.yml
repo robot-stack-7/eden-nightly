@@ -347,28 +347,35 @@ jobs:
           echo "PATH=C:/VulkanSDK/1.4.313.1/Bin:$PATH" >> $GITHUB_ENV
 
       - name: Pull Eden with submodules
-        if: ${{ matrix.toolchain == 'msvc' }}
         run: |
-          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-          fi
-          cd ./eden
-          git submodule update --init --recursive
-          echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
+          if [[ "${{ matrix.toolchain }}" == "msvc" ]]; then
+            # Clone master branch
+            if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+              echo "Using mirror instead..."
+              rm -rf ./eden || true
+              git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
+            fi
+          else
+            # Clone feature branch
+            if ! git clone -b "gcc/clang_support" 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+              echo "Using mirror instead..."
+              rm -rf ./eden || true
+              git clone -b "gcc/clang_support" 'https://github.com/pflyly/eden-mirror.git' ./eden
+            fi
 
-      - name: Pull Eden with submodules
-        if: ${{ matrix.toolchain == 'msys2' }}
-        run: |
-          if ! git clone -b "gcc/clang_support" --single-branch 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone -b "gcc/clang_support" --single-branch 'https://github.com/pflyly/eden-mirror.git' ./eden
+            cd ./eden
+            git fetch origin master
+            git config user.email "test@eden-emu.dev"
+            git config user.name  "Eden test"
+            git checkout gcc/clang_support
+            git rebase origin/master
+            cd ..
           fi
+
           cd ./eden
           git submodule update --init --recursive
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
+          echo "VERSION=$(git rev-list --count HEAD)"
 
       - name: Restore cpm cache
         uses: actions/cache/restore@v4
