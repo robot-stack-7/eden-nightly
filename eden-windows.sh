@@ -7,9 +7,13 @@ cd ./eden
 declare -a EXTRA_CMAKE_FLAGS=()
 
 if [[ "${TOOLCHAIN}" == "msvc" ]]; then
+
+    # hook the updater to check my repo
+    git apply ../patches/update.patch
+
     if [[ "${ARCH}" == "ARM64" ]]; then
         # Not working, leave it here for future test
-        git apply -p1 ../patches/windows_arm64.patch
+        git apply ../patches/windows_arm64.patch
     elif [[ "${ARCH}" == "x86_64" ]]; then
         echo "Enabling AVX2 optimizations and C++ exception handling for native x86_64 performance."
         EXTRA_CMAKE_FLAGS+=("-DCMAKE_CXX_FLAGS=/arch:AVX2 /EHsc")
@@ -19,6 +23,9 @@ if [[ "${TOOLCHAIN}" == "msvc" ]]; then
     find . -name CMakeLists.txt -exec sed -i 's|/W4||g; s|/Zi||g; s|/Zo||g; s|  *| |g' {} +
 
 elif [[ "${TOOLCHAIN}" == "msys2" ]]; then
+        # temp fix
+        sed -i 's|#include "common/logging/log.h"|#include "common/logging/log.h"\n#include "common/assert.h"|' src/common/heap_tracker.cpp
+        
         EXTRA_CMAKE_FLAGS+=(
         "-DCMAKE_C_COMPILER=gcc"
         "-DCMAKE_CXX_COMPILER=g++"
@@ -41,6 +48,7 @@ cmake .. -G Ninja \
     -DYUZU_TESTS=OFF \
     -DYUZU_USE_BUNDLED_QT=OFF \
     -DENABLE_QT_TRANSLATION=ON \
+    -DENABLE_QT_UPDATE_CHECKER=ON \
     -DYUZU_ENABLE_LTO=ON \
     -DUSE_DISCORD_PRESENCE=OFF \
     -DYUZU_CMD=OFF \

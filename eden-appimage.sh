@@ -63,6 +63,9 @@ cd ./eden
 COUNT="$(git rev-list --count HEAD)"
 DATE="$(date +"%d_%m_%Y")"
 
+# hook the updater to check my repo
+git apply ../patches/update.patch
+
 mkdir build
 cd build
 cmake .. -GNinja \
@@ -73,6 +76,7 @@ cmake .. -GNinja \
     -DYUZU_USE_FASTER_LD=ON \
     -DYUZU_ENABLE_LTO=ON \
     -DENABLE_QT_TRANSLATION=ON \
+	-DENABLE_QT_UPDATE_CHECKER=ON \
     -DUSE_DISCORD_PRESENCE=OFF \
     -DYUZU_CMD=OFF \
     -DYUZU_ROOM_STANDALONE=OFF \

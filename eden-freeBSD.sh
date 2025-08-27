@@ -8,6 +8,9 @@ cd ./eden
 git config --global --add safe.directory .
 COUNT="$(git rev-list --count HEAD)"
 
+# hook the updater to check my repo
+git apply ../patches/update.patch
+
 mkdir -p build
 cd build
 cmake .. -GNinja \
@@ -18,6 +21,7 @@ cmake .. -GNinja \
     -DYUZU_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES=ON \
     -DYUZU_USE_EXTERNAL_VULKAN_HEADERS=ON \
     -DENABLE_QT_TRANSLATION=ON \
+    -DENABLE_QT_UPDATE_CHECKER=ON \
     -DUSE_DISCORD_PRESENCE=OFF \
     -DYUZU_CMD=OFF \
     -DYUZU_ROOM_STANDALONE=OFF \

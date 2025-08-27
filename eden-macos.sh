@@ -8,7 +8,12 @@ else
 fi
 
 cd ./eden
-patch -p1 < ../patches/macos_arm64.patch
+
+# fix spirv related build error
+git apply ../patches/macos_arm64.patch
+
+# hook the updater to check my repo
+git apply ../patches/update.patch
 
 COUNT="$(git rev-list --count HEAD)"
 APP_NAME="Eden-${COUNT}-MacOS-${TARGET}"
@@ -21,6 +26,7 @@ cmake .. -GNinja \
  	-DDYNARMIC_TESTS=OFF \
     -DYUZU_USE_BUNDLED_QT=OFF \
     -DENABLE_QT_TRANSLATION=ON \
+	-DENABLE_QT_UPDATE_CHECKER=ON \
     -DYUZU_ENABLE_LTO=ON \
     -DUSE_DISCORD_PRESENCE=OFF \
     -DYUZU_CMD=OFF \

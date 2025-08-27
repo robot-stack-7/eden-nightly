@@ -1,0 +1,134 @@
+diff --git a/CMakeModules/GenerateSCMRev.cmake b/CMakeModules/GenerateSCMRev.cmake
+index 3b8e996751..e8ea78a345 100644
+--- a/CMakeModules/GenerateSCMRev.cmake
++++ b/CMakeModules/GenerateSCMRev.cmake
+@@ -3,7 +3,7 @@
+ 
+ # Gets a UTC timestamp and sets the provided variable to it
+ function(get_timestamp _var)
+-    string(TIMESTAMP timestamp UTC)
++    string(TIMESTAMP timestamp "%Y-%m-%d" UTC)
+     set(${_var} "${timestamp}" PARENT_SCOPE)
+ endfunction()
+ 
+@@ -19,10 +19,11 @@ if (NOT GIT_BRANCH)
+   git_branch_name(GIT_BRANCH)
+ endif()
+ get_timestamp(BUILD_DATE)
++git_count(GIT_COUNT)
+ 
+ git_get_exact_tag(GIT_TAG --tags)
+ if (GIT_TAG MATCHES "NOTFOUND")
+-  set(BUILD_VERSION "${GIT_DESC}")
++  set(BUILD_VERSION "${BUILD_DATE}-${GIT_COUNT}")
+   set(IS_DEV_BUILD true)
+ else()
+   set(BUILD_VERSION ${GIT_TAG})
+diff --git a/externals/cmake-modules/GetGitRevisionDescription.cmake b/externals/cmake-modules/GetGitRevisionDescription.cmake
+index dab1347753..5e5724d312 100644
+--- a/externals/cmake-modules/GetGitRevisionDescription.cmake
++++ b/externals/cmake-modules/GetGitRevisionDescription.cmake
+@@ -160,3 +160,29 @@ function(git_get_exact_tag _var)
+ 	git_describe(out --exact-match ${ARGN})
+ 	set(${_var} "${out}" PARENT_SCOPE)
+ endfunction()
++
++function(git_count _var)
++    if(NOT GIT_FOUND)
++        find_package(Git QUIET)
++    endif()
++
++    if(NOT GIT_FOUND)
++        set(${_var} "GIT-NOTFOUND" PARENT_SCOPE)
++        return()
++    endif()
++
++    execute_process(
++        COMMAND "${GIT_EXECUTABLE}" rev-list --count HEAD
++        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
++        RESULT_VARIABLE res
++        OUTPUT_VARIABLE out
++        ERROR_QUIET
++        OUTPUT_STRIP_TRAILING_WHITESPACE
++    )
++
++    if(NOT res EQUAL 0)
++        set(out "${out}-${res}-NOTFOUND")
++    endif()
++
++    set(${_var} "${out}" PARENT_SCOPE)
++endfunction()
+diff --git a/src/common/heap_tracker.cpp b/src/common/heap_tracker.cpp
+index 6832087959..ef37942c7c 100644
+--- a/src/common/heap_tracker.cpp
++++ b/src/common/heap_tracker.cpp
+@@ -6,6 +6,7 @@
+ 
+ #include "common/heap_tracker.h"
+ #include "common/logging/log.h"
++#include "common/assert.h"
+ 
+ namespace Common {
+ 
+diff --git a/src/yuzu/about_dialog.cpp b/src/yuzu/about_dialog.cpp
+index 5b6e32149d..2a6a1362da 100644
+--- a/src/yuzu/about_dialog.cpp
++++ b/src/yuzu/about_dialog.cpp
+@@ -16,7 +16,7 @@ AboutDialog::AboutDialog(QWidget* parent)
+ 
+     std::string yuzu_build;
+     if (Common::g_is_dev_build) {
+-        yuzu_build = fmt::format("Eden Nightly | {}-{}", description, build_id);
++        yuzu_build = fmt::format("Eden Nightly | {}", description);
+     } else {
+         yuzu_build = fmt::format("Eden | {}", description);
+     }
+@@ -34,7 +34,7 @@ AboutDialog::AboutDialog(QWidget* parent)
+     }
+     ui->labelBuildInfo->setText(
+         ui->labelBuildInfo->text().arg(QString::fromStdString(yuzu_build_version),
+-                                       QString::fromUtf8(Common::g_build_date).left(10)));
++                                       QString::fromUtf8(Common::g_build_id)));
+ }
+ 
+ AboutDialog::~AboutDialog() = default;
+diff --git a/src/yuzu/main.cpp b/src/yuzu/main.cpp
+index 2c3c46114d..de28fd173d 100644
+--- a/src/yuzu/main.cpp
++++ b/src/yuzu/main.cpp
+@@ -4979,11 +4979,11 @@ void GMainWindow::OnEmulatorUpdateAvailable() {
+     update_prompt.addButton(QMessageBox::Yes);
+     update_prompt.addButton(QMessageBox::Ignore);
+     update_prompt.setText(
+-        tr("Update %1 for Eden is available.\nWould you like to download it?").arg(version_string));
++        tr("Update %1 for Eden Nightly is available.\nWould you like to download it?").arg(version_string));
+     update_prompt.exec();
+     if (update_prompt.button(QMessageBox::Yes) == update_prompt.clickedButton()) {
+         QDesktopServices::openUrl(
+-            QUrl(QString::fromStdString("https://github.com/eden-emulator/Releases/releases/tag/") +
++            QUrl(QString::fromStdString("https://github.com/pflyly/eden-nightly/releases/tag/") +
+                  version_string));
+     }
+ }
+@@ -4996,7 +4996,7 @@ void GMainWindow::UpdateWindowTitle(std::string_view title_name, std::string_vie
+ 
+     std::string yuzu_title;
+     if (Common::g_is_dev_build) {
+-        yuzu_title = fmt::format("Eden Nightly | {}-{}", description, build_id);
++        yuzu_title = fmt::format("Eden Nightly | {}", description);
+     } else {
+         yuzu_title = fmt::format("Eden | {}", description);
+     }
+diff --git a/src/yuzu/update_checker.cpp b/src/yuzu/update_checker.cpp
+index 8291987d73..b8eb4c1e1f 100644
+--- a/src/yuzu/update_checker.cpp
++++ b/src/yuzu/update_checker.cpp
+@@ -55,7 +55,7 @@ std::optional<std::string> UpdateChecker::GetResponse(std::string url, std::stri
+ std::optional<std::string> UpdateChecker::GetLatestRelease(bool include_prereleases)
+ {
+     constexpr auto update_check_url = "http://api.github.com";
+-    std::string update_check_path = "/repos/eden-emulator/Releases";
++    std::string update_check_path = "/repos/pflyly/eden-nightly";
+     try {
+         if (include_prereleases) { // This can return either a prerelease or a stable release,
+             // whichever is more recent.
