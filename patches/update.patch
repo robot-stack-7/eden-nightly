@@ -58,18 +58,6 @@ index dab1347753..5e5724d312 100644
 +
 +    set(${_var} "${out}" PARENT_SCOPE)
 +endfunction()
-diff --git a/src/common/heap_tracker.cpp b/src/common/heap_tracker.cpp
-index 6832087959..ef37942c7c 100644
---- a/src/common/heap_tracker.cpp
-+++ b/src/common/heap_tracker.cpp
-@@ -6,6 +6,7 @@
- 
- #include "common/heap_tracker.h"
- #include "common/logging/log.h"
-+#include "common/assert.h"
- 
- namespace Common {
- 
 diff --git a/src/yuzu/about_dialog.cpp b/src/yuzu/about_dialog.cpp
 index 5b6e32149d..2a6a1362da 100644
 --- a/src/yuzu/about_dialog.cpp
