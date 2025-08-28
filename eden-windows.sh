@@ -6,11 +6,10 @@ cd ./eden
 
 declare -a EXTRA_CMAKE_FLAGS=()
 
+# hook the updater to check my repo
+patch -p1 < ../patches/update.patch
+
 if [[ "${TOOLCHAIN}" == "msvc" ]]; then
-
-    # hook the updater to check my repo
-    git apply ../patches/update.patch
-
     if [[ "${ARCH}" == "ARM64" ]]; then
         # Not working, leave it here for future test
         git apply ../patches/windows_arm64.patch
@@ -23,8 +22,8 @@ if [[ "${TOOLCHAIN}" == "msvc" ]]; then
     find . -name CMakeLists.txt -exec sed -i 's|/W4||g; s|/Zi||g; s|/Zo||g; s|  *| |g' {} +
 
 elif [[ "${TOOLCHAIN}" == "msys2" ]]; then
-        # temp fix
-        sed -i 's|#include "common/logging/log.h"|#include "common/logging/log.h"\n#include "common/assert.h"|' src/common/heap_tracker.cpp
+        # mingw64 gcc/clang support wip branch diff
+        patch -p1 < ../patches/clang.patch
         
         EXTRA_CMAKE_FLAGS+=(
         "-DCMAKE_C_COMPILER=gcc"

@@ -58,6 +58,18 @@ index dab1347753..5e5724d312 100644
 +
 +    set(${_var} "${out}" PARENT_SCOPE)
 +endfunction()
+diff --git a/src/common/string_util.h b/src/common/string_util.h
+index 8ed87cdadc..bce126294b 100644
+--- a/src/common/string_util.h
++++ b/src/common/string_util.h
+@@ -10,6 +10,7 @@
+ #include <cstddef>
+ #include <span>
+ #include <string>
++#include <algorithm>
+ #include <vector>
+ #include "common/common_types.h"
+ 
 diff --git a/src/yuzu/about_dialog.cpp b/src/yuzu/about_dialog.cpp
 index 5b6e32149d..2a6a1362da 100644
 --- a/src/yuzu/about_dialog.cpp

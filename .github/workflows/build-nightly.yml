@@ -348,30 +348,11 @@ jobs:
 
       - name: Pull Eden with submodules
         run: |
-          if [[ "${{ matrix.toolchain }}" == "msvc" ]]; then
-            # Clone master branch
-            if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-              echo "Using mirror instead..."
-              rm -rf ./eden || true
-              git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-            fi
-          else
-            # Clone feature branch
-            if ! git clone -b "gcc/clang_support" 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-              echo "Using mirror instead..."
-              rm -rf ./eden || true
-              git clone -b "gcc/clang_support" 'https://github.com/pflyly/eden-mirror.git' ./eden
-            fi
-
-            cd ./eden
-            git fetch origin master
-            git config user.email "test@eden-emu.dev"
-            git config user.name  "Eden test"
-            git checkout gcc/clang_support
-            git rebase origin/master
-            cd ..
+          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+            echo "Using mirror instead..."
+            rm -rf ./eden || true
+            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
           fi
-
           cd ./eden
           git submodule update --init --recursive
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
