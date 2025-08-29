@@ -471,7 +471,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install --formula --quiet autoconf automake boost ccache glslang hidapi libiconv libtool nasm qt@6 speexdsp vulkan-loader
+          brew uninstall --ignore-dependencies cmake || true
+          brew install --formula --quiet autoconf automake boost ccache cmake glslang hidapi libiconv libtool nasm qt@6 speexdsp vulkan-loader
 
       - name: Compile Eden MacOS (${{ matrix.target }})
         run: |
