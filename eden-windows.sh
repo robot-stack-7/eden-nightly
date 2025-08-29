@@ -13,9 +13,6 @@ if [[ "${TOOLCHAIN}" == "msvc" ]]; then
     if [[ "${ARCH}" == "ARM64" ]]; then
         # Not working, leave it here for future test
         git apply ../patches/windows_arm64.patch
-    elif [[ "${ARCH}" == "x86_64" ]]; then
-        echo "Enabling AVX2 optimizations and C++ exception handling for native x86_64 performance."
-        EXTRA_CMAKE_FLAGS+=("-DCMAKE_CXX_FLAGS=/arch:AVX2 /EHsc")
     fi
 
     # disable debug info and silence warnings.
@@ -26,12 +23,14 @@ elif [[ "${TOOLCHAIN}" == "msys2" ]]; then
         patch -p1 < ../patches/clang.patch
         
         EXTRA_CMAKE_FLAGS+=(
+        "-DYUZU_ENABLE_LTO=ON"
         "-DCMAKE_C_COMPILER=gcc"
         "-DCMAKE_CXX_COMPILER=g++"
         "-DCMAKE_C_FLAGS=-O3 -flto -fno-fat-lto-objects"
         "-DCMAKE_CXX_FLAGS=-O3 -flto -fno-fat-lto-objects"
         "-DCMAKE_EXE_LINKER_FLAGS=-flto"
         "-DCMAKE_SHARED_LINKER_FLAGS=-flto"
+        "-DCMAKE_MODULE_LINKER_FLAGS=-flto"
         )
 fi
 
@@ -48,7 +47,6 @@ cmake .. -G Ninja \
     -DYUZU_USE_BUNDLED_QT=OFF \
     -DENABLE_QT_TRANSLATION=ON \
     -DENABLE_QT_UPDATE_CHECKER=ON \
-    -DYUZU_ENABLE_LTO=ON \
     -DUSE_DISCORD_PRESENCE=OFF \
     -DYUZU_CMD=OFF \
     -DYUZU_ROOM_STANDALONE=OFF \

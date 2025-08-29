@@ -9,8 +9,8 @@ fi
 
 cd ./eden
 
-# fix spirv related build error
-git apply ../patches/macos_arm64.patch
+# fix drm error
+git apply ../patches/macos.patch
 
 # hook the updater to check my repo
 git apply ../patches/update.patch
