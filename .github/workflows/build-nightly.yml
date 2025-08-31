@@ -305,7 +305,7 @@ jobs:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros,include_file_mtime,file_stat_matches
-      CCACHE_MAXSIZE: 1G
+      CCACHE_MAXSIZE: 1.5G
     steps:
       - uses: actions/checkout@v4.2.2
 
