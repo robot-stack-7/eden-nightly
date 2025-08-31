@@ -13,9 +13,9 @@ APPDIR="${BUILD_DIR}/mesa/AppDir"
 mkdir -p "${APPDIR}"
 cd "${APPDIR}"
 
-cp -v ../../../dist/org.eden_emu.eden.desktop .
-cp -v ../../../dist/org.eden_emu.eden.svg .
-ln -sfv ./org.eden_emu.eden.svg ./.DirIcon
+cp -v ../../../dist/dev.eden_emu.eden.desktop .
+cp -v ../../../dist/dev.eden_emu.eden.svg .
+ln -sfv ./dev.eden_emu.eden.svg ./.DirIcon
 
 wget --retry-connrefused --tries=30 "$SHARUN" -O ./sharun-aio
 chmod +x ./sharun-aio

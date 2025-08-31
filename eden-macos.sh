@@ -9,7 +9,6 @@ fi
 
 cd ./eden
 
-# fix drm error
 git apply ../patches/macos.patch
 
 # hook the updater to check my repo

@@ -1,27 +1,3 @@
-diff --git a/externals/ffmpeg/CMakeLists.txt b/externals/ffmpeg/CMakeLists.txt
-index 54c852f831..d7b9326d98 100644
---- a/externals/ffmpeg/CMakeLists.txt
-+++ b/externals/ffmpeg/CMakeLists.txt
-@@ -68,15 +68,16 @@ if (NOT WIN32 AND NOT ANDROID)
-         list(APPEND FFmpeg_HWACCEL_LIBRARIES
-             X11
-             "/usr/lib/xorg/amd64/libdrm.so")
--    else()
-+    elseif(UNIX AND NOT APPLE)
-         pkg_check_modules(LIBDRM libdrm REQUIRED)
-         list(APPEND FFmpeg_HWACCEL_LIBRARIES
-             ${LIBDRM_LIBRARIES})
-         list(APPEND FFmpeg_HWACCEL_INCLUDE_DIRS
-             ${LIBDRM_INCLUDE_DIRS})
-+        list(APPEND FFmpeg_HWACCEL_FLAGS
-+            --enable-libdrm)
-     endif()
--    list(APPEND FFmpeg_HWACCEL_FLAGS
--        --enable-libdrm)
-+
- 
-     if(LIBVA_FOUND)
-         find_package(X11 REQUIRED)
 diff --git a/src/video_core/renderer_vulkan/vk_texture_cache.cpp b/src/video_core/renderer_vulkan/vk_texture_cache.cpp
 index eda9ff2a5a..81a719da6c 100644
 --- a/src/video_core/renderer_vulkan/vk_texture_cache.cpp

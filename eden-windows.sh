@@ -13,6 +13,11 @@ if [[ "${TOOLCHAIN}" == "msvc" ]]; then
     if [[ "${ARCH}" == "ARM64" ]]; then
         # Not working, leave it here for future test
         git apply ../patches/windows_arm64.patch
+    elif [[ "${ARCH}" == "x86_64" ]]; then
+        EXTRA_CMAKE_FLAGS+=(
+            "-DCMAKE_CXX_FLAGS=/arch:AVX2 /EHsc"
+            "-DYUZU_ENABLE_LTO=ON"
+            )
     fi
 
     # disable debug info and silence warnings.
@@ -23,14 +28,8 @@ elif [[ "${TOOLCHAIN}" == "msys2" ]]; then
         patch -p1 < ../patches/clang.patch
         
         EXTRA_CMAKE_FLAGS+=(
-        "-DYUZU_ENABLE_LTO=ON"
         "-DCMAKE_C_COMPILER=gcc"
         "-DCMAKE_CXX_COMPILER=g++"
-        "-DCMAKE_C_FLAGS=-O3 -flto -fno-fat-lto-objects"
-        "-DCMAKE_CXX_FLAGS=-O3 -flto -fno-fat-lto-objects"
-        "-DCMAKE_EXE_LINKER_FLAGS=-flto"
-        "-DCMAKE_SHARED_LINKER_FLAGS=-flto"
-        "-DCMAKE_MODULE_LINKER_FLAGS=-flto"
         )
 fi
 
@@ -57,7 +56,7 @@ cmake .. -G Ninja \
     -DCMAKE_SYSTEM_PROCESSOR=${ARCH} \
     "${EXTRA_CMAKE_FLAGS[@]}"
 ninja
-ccache -s -v
+ccache -c -s -v
 
 # Gather dependencies
 EXE_PATH=./bin/eden.exe
@@ -79,7 +78,6 @@ if [[ "${TOOLCHAIN}" == "msvc" ]]; then
     find bin -type f -name "*.pdb" -exec rm -fv {} +
 
 elif [[ "${TOOLCHAIN}" == "msys2" ]]; then
-    
     windeployqt6 --release --no-compiler-runtime --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --dir ./bin "$EXE_PATH"
     echo -e "[Paths]\nPrefix = ." > ./bin/qt.conf    
     

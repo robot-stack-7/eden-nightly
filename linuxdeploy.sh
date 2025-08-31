@@ -30,10 +30,10 @@ export EXTRA_QT_MODULES="svg;waylandcompositor"
 NO_STRIP=1 ./linuxdeploy \
   --appdir "${APPDIR}" \
   -e ./bin/eden \
-  -d ../dist/org.eden_emu.eden.desktop \
-  -i ../dist/org.eden_emu.eden.svg \
+  -d ../dist/dev.eden_emu.eden.desktop \
+  -i ../dist/dev.eden_emu.eden.svg \
   -l /usr/lib/libSDL3.so.0 \
   --plugin qt \
   --plugin checkrt
 
-ln -sfv "usr/share/icons/hicolor/scalable/apps/org.eden_emu.eden.svg" "${APPDIR}/.DirIcon"
+ln -sfv "usr/share/icons/hicolor/scalable/apps/dev.eden_emu.eden.svg" "${APPDIR}/.DirIcon"
