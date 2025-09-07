@@ -718,7 +718,7 @@ jobs:
           echo "EOF" >> "${GITHUB_ENV}"
 
       - name: Release Eden
-        uses: softprops/action-gh-release@v2.2.2
+        uses: softprops/action-gh-release@v2.3.3
         with:
           name: "Eden Unofficial Nightly Release: ${{ env.COUNT }}"
           tag_name: "${{ env.TAG }}"
