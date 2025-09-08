@@ -277,7 +277,7 @@ jobs:
 
   windows:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows'
-    runs-on: windows-2025
+    runs-on: windows-2022
     name: "Windows ${{ matrix.toolchain }} (${{ matrix.arch }})"
     continue-on-error: true
     strategy:
