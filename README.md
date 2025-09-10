@@ -16,7 +16,7 @@ This repository provides **unofficial nightly releases** of **Eden** for the fol
 - **FreeBSD** (`amd64`)
 - **Android**
 - **Windows-MSVC** (`x86_64`)
-- **Windows-MSYS2** (`x86_64`)
+- **Windows-CLANG** (`x86_64`)
 - **MacOS** (`x86_64`, `arm64`)
 
 >[!WARNING]

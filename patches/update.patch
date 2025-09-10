@@ -1,5 +1,5 @@
 diff --git a/CMakeModules/GenerateSCMRev.cmake b/CMakeModules/GenerateSCMRev.cmake
-index 3b8e996751..e8ea78a345 100644
+index bcb5dc466a..e87c397d5f 100644
 --- a/CMakeModules/GenerateSCMRev.cmake
 +++ b/CMakeModules/GenerateSCMRev.cmake
 @@ -3,7 +3,7 @@
@@ -59,19 +59,19 @@ index dab1347753..5e5724d312 100644
 +    set(${_var} "${out}" PARENT_SCOPE)
 +endfunction()
 diff --git a/src/yuzu/about_dialog.cpp b/src/yuzu/about_dialog.cpp
-index 5b6e32149d..2a6a1362da 100644
+index c8edb90268..a723bc174a 100644
 --- a/src/yuzu/about_dialog.cpp
 +++ b/src/yuzu/about_dialog.cpp
-@@ -16,7 +16,7 @@ AboutDialog::AboutDialog(QWidget* parent)
+@@ -17,7 +17,7 @@ AboutDialog::AboutDialog(QWidget* parent)
  
      std::string yuzu_build;
      if (Common::g_is_dev_build) {
--        yuzu_build = fmt::format("Eden Nightly | {}-{}", description, build_id);
-+        yuzu_build = fmt::format("Eden Nightly | {}", description);
+-        yuzu_build = fmt::format("Eden Nightly | {}-{} | {}", description, build_id, compiler);
++        yuzu_build = fmt::format("Eden Nightly | {} | {}", description, compiler);
      } else {
-         yuzu_build = fmt::format("Eden | {}", description);
+         yuzu_build = fmt::format("Eden | {} | {}", description, compiler);
      }
-@@ -34,7 +34,7 @@ AboutDialog::AboutDialog(QWidget* parent)
+@@ -35,7 +35,7 @@ AboutDialog::AboutDialog(QWidget* parent)
      }
      ui->labelBuildInfo->setText(
          ui->labelBuildInfo->text().arg(QString::fromStdString(yuzu_build_version),
@@ -81,10 +81,10 @@ index 5b6e32149d..2a6a1362da 100644
  
  AboutDialog::~AboutDialog() = default;
 diff --git a/src/yuzu/main.cpp b/src/yuzu/main.cpp
-index 2c3c46114d..de28fd173d 100644
+index c6e004813c..6397232fc9 100644
 --- a/src/yuzu/main.cpp
 +++ b/src/yuzu/main.cpp
-@@ -4979,11 +4979,11 @@ void GMainWindow::OnEmulatorUpdateAvailable() {
+@@ -5010,11 +5010,11 @@ void GMainWindow::OnEmulatorUpdateAvailable() {
      update_prompt.addButton(QMessageBox::Yes);
      update_prompt.addButton(QMessageBox::Ignore);
      update_prompt.setText(
@@ -98,14 +98,14 @@ index 2c3c46114d..de28fd173d 100644
                   version_string));
      }
  }
-@@ -4996,7 +4996,7 @@ void GMainWindow::UpdateWindowTitle(std::string_view title_name, std::string_vie
+@@ -5028,7 +5028,7 @@ void GMainWindow::UpdateWindowTitle(std::string_view title_name, std::string_vie
  
      std::string yuzu_title;
      if (Common::g_is_dev_build) {
--        yuzu_title = fmt::format("Eden Nightly | {}-{}", description, build_id);
-+        yuzu_title = fmt::format("Eden Nightly | {}", description);
+-        yuzu_title = fmt::format("Eden Nightly | {}-{} | {}", description, build_id, compiler);
++        yuzu_title = fmt::format("Eden Nightly | {} | {}", description, compiler);
      } else {
-         yuzu_title = fmt::format("Eden | {}", description);
+         yuzu_title = fmt::format("Eden | {} | {}", description, compiler);
      }
 diff --git a/src/yuzu/update_checker.cpp b/src/yuzu/update_checker.cpp
 index 8291987d73..b8eb4c1e1f 100644
