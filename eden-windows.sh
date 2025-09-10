@@ -13,6 +13,8 @@ if [[ "${TOOLCHAIN}" == "clang" ]]; then
     EXTRA_CMAKE_FLAGS+=(
         "-DCMAKE_C_COMPILER=clang-cl"
         "-DCMAKE_CXX_COMPILER=clang-cl"
+        "-DCMAKE_CXX_FLAGS=-O3"
+        "-DCMAKE_C_FLAGS=-O3"
     )
 fi
 
@@ -36,12 +38,8 @@ cmake .. -G Ninja \
     -DYUZU_CMD=OFF \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    -DYUZU_USE_PRECOMPILED_HEADERS=OFF \
     "${EXTRA_CMAKE_FLAGS[@]}"
 ninja
-ccache -c -s -v
 
 # Gather dependencies
 windeployqt6 --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir bin ./bin/eden.exe

@@ -13,11 +13,11 @@
 This repository provides **unofficial nightly releases** of **Eden** for the following platforms:
 
 - **Linux** (`x86_64`, `aarch64`)
-- **FreeBSD** (`amd64`)
 - **Android**
-- **Windows-MSVC** (`x86_64`)
-- **Windows-CLANG** (`x86_64`)
+- **Windows-MSVC** (`x86_64`, `arm64`)
+- **Windows-CLANG** (`x86_64`, `arm64`)
 - **MacOS** (`x86_64`, `arm64`)
+- **FreeBSD** (`amd64`)
 
 >[!WARNING]
 >**This repository is not affiliated with the official Eden development team. It exists solely to provide an easy way for users to try out the latest features from recent commits.**
@@ -45,7 +45,7 @@ A **Light version** Appimage is also available, built with **linuxdeploy**. It d
 ---------------------------------------------------------------
 
 ### FreeBSD Builds
-> ⚠️ FreeBSD builds are provided for **testing purposes only**.
+> ⚠️ FreeBSD builds are provided as-is for **testing purposes only**.
 >   
 > Functionality may be limited and issues are expected. If you encounter any problems, you're welcome to open an issue.
 > 

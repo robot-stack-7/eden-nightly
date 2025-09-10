@@ -277,7 +277,7 @@ jobs:
 
   windows:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows'
-    runs-on: windows-2022
+    runs-on: ${{ matrix.runs-on }}
     name: "Windows ${{ matrix.toolchain }} (${{ matrix.arch }})"
     continue-on-error: true
     strategy:
@@ -285,44 +285,36 @@ jobs:
         include:
            - toolchain: msvc
              arch: x86_64
-             cross: x64
-             qt_arch: win64_msvc2022_64
-             
+             runs-on: windows-2022
+           - toolchain: msvc
+             arch: arm64
+             runs-on: windows-11-arm
            - toolchain: clang
              arch: x86_64
-             cross: x64
-             qt_arch: win64_msvc2022_64
-
+             runs-on: windows-2022
+           - toolchain: clang
+             arch: arm64
+             runs-on: windows-11-arm
     env:
       TOOLCHAIN: ${{ matrix.toolchain }}
       ARCH: ${{ matrix.arch }}
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_COMPILERCHECK: content
-      CCACHE_SLOPPINESS: time_macros
-      CCACHE_MAXSIZE: 1.5G
     steps:
       - uses: actions/checkout@v5.0.0
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: ${{ matrix.cross }}
+          arch: ${{ matrix.arch }}
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4.3.0
         with:
           version: '6.9.1'
-          arch: ${{ matrix.qt_arch }}
 
       - name: Install vulkan-sdk
         shell: powershell
         run: |
           ./install-vulkan-sdk.ps1
-          
-      - name: install ccache
-        shell: bash
-        run: |
-          choco install ccache -y --no-progress
           
       - name: Pull Eden with submodules
         shell: bash
@@ -347,15 +339,6 @@ jobs:
           key: ${{ runner.os }}-cpm-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpm-${{ matrix.toolchain }}-${{ matrix.arch }}-
-
-      - name: Restore ccache
-        uses: actions/cache/restore@v4
-        id: restore-ccache-cache
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-
 
       - name: Compile Eden Windows
         shell: bash
@@ -391,13 +374,6 @@ jobs:
             ${{ github.workspace }}/eden/.cache
             ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
-
-      - name: Save ccache
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ steps.restore-ccache-cache.outputs.cache-primary-key }}
 
   macos:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'macos'
@@ -642,7 +618,15 @@ jobs:
 
       - uses: actions/download-artifact@v5.0.0
         with:
+          name: eden-windows-msvc-7z-arm64
+
+      - uses: actions/download-artifact@v5.0.0
+        with:
           name: eden-windows-msvc-installer-x86_64
+
+      - uses: actions/download-artifact@v5.0.0
+        with:
+          name: eden-windows-msvc-installer-arm64
 
       - uses: actions/download-artifact@v5.0.0
         with:
@@ -650,8 +634,16 @@ jobs:
 
       - uses: actions/download-artifact@v5.0.0
         with:
+          name: eden-windows-clang-7z-arm64
+
+      - uses: actions/download-artifact@v5.0.0
+        with:
           name: eden-windows-clang-installer-x86_64
-          
+
+      - uses: actions/download-artifact@v5.0.0
+        with:
+          name: eden-windows-clang-installer-arm64
+
       - uses: actions/download-artifact@v5.0.0
         with:
           name: eden-macos-x86_64
