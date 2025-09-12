@@ -20,6 +20,15 @@ case "$1" in
 		CCACHE="ccache"
         TARGET="Steamdeck"
         ;;
+    steamdeck-pgo)
+        echo "Making Eden PGO_Optimized Build for Steam Deck"
+        CMAKE_CXX_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+        CMAKE_C_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+		YUZU_USE_PRECOMPILED_HEADERS=OFF
+ 		PROFILE="steamdeck"
+		CCACHE="ccache"
+        TARGET="Steamdeck-PGO"
+        ;;
     rog)
         echo "Making Eden Optimized Build for ROG ALLY X"
         CMAKE_CXX_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -w"
@@ -28,6 +37,15 @@ case "$1" in
  		PROFILE="steamdeck"
 		CCACHE="ccache"
         TARGET="ROG_ALLY"
+        ;;
+    rog-pgo)
+        echo "Making Eden PGO Optimized Build for ROG ALLY X"
+        CMAKE_CXX_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+        CMAKE_C_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+		YUZU_USE_PRECOMPILED_HEADERS=OFF
+ 		PROFILE="steamdeck"
+		CCACHE="ccache"
+        TARGET="ROG_ALLY-PGO"
         ;;
     common)
         echo "Making Eden Optimized Build for Modern CPUs"
@@ -38,6 +56,15 @@ case "$1" in
         ARCH="${ARCH}_v3"
         TARGET="Common"
         ;;
+    common-pgo)
+        echo "Making Eden PGO Optimized Build for Modern CPUs"
+        CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+        CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+		YUZU_USE_PRECOMPILED_HEADERS=OFF
+		CCACHE="ccache"
+        ARCH="${ARCH}_v3"
+        TARGET="Common-PGO"
+        ;;
     legacy)
         echo "Making Eden Optimized Build for Legacy CPUs"
         CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -w"
@@ -46,6 +73,14 @@ case "$1" in
 		CCACHE="ccache"
         TARGET="Legacy"
         ;;
+    legacy-pgo)
+        echo "Making Eden Optimized Build for Legacy CPUs"
+        CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+        CMAKE_C_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+		YUZU_USE_PRECOMPILED_HEADERS=OFF
+		CCACHE="ccache"
+        TARGET="Legacy-PGO"
+        ;;
     aarch64)
         echo "Making Eden Optimized Build for AArch64"
         CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -w"
@@ -53,6 +88,14 @@ case "$1" in
 		OPENSSL="OFF"
 		CCACHE="sccache"	
         TARGET="Linux"
+        ;;
+    aarch64-pgo)
+        echo "Making Eden PGO Optimized Build for AArch64"
+        CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+        CMAKE_C_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+		OPENSSL="OFF"
+		CCACHE="sccache"	
+        TARGET="Linux-PGO"
         ;;
 esac
 
@@ -85,6 +128,9 @@ cmake .. -GNinja \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_SYSTEM_PROCESSOR="$(uname -m)" \
     -DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_C_COMPILER=clang \
+ 	-DCMAKE_CXX_COMPILER=clang++ \
+  	-DCMAKE_LINKER=lld \
     -DCMAKE_EXE_LINKER_FLAGS="-Wl,--as-needed" \
     -DYUZU_SYSTEM_PROFILE="${PROFILE:-}" \
 	-DYUZU_USE_BUNDLED_OPENSSL="${OPENSSL:-}" \
@@ -96,7 +142,7 @@ cmake .. -GNinja \
 ninja
 strip -s bin/*
 
-if [ "$1" != 'aarch64' ]; then
+if [ "$1" != "aarch64" ] && [ "$1" != "aarch64-pgo" ]; then
     ccache -s -v
 else
     sccache --show-stats

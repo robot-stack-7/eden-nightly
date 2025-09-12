@@ -12,6 +12,7 @@ on:
         options:
           - all
           - windows
+          - windows-pgo
           - appimage
           - macos
           - android
@@ -87,6 +88,16 @@ jobs:
           - target: legacy
             runs-on: ubuntu-latest
           - target: aarch64
+            runs-on: ubuntu-24.04-arm
+          - target: steamdeck-pgo
+            runs-on: ubuntu-latest
+          - target: rog-pgo
+            runs-on: ubuntu-latest
+          - target: common-pgo
+            runs-on: ubuntu-latest
+          - target: legacy-pgo
+            runs-on: ubuntu-latest
+          - target: aarch64-pgo
             runs-on: ubuntu-24.04-arm
     continue-on-error: true
     container: ghcr.io/pkgforge-dev/archlinux:latest
@@ -298,6 +309,7 @@ jobs:
     env:
       TOOLCHAIN: ${{ matrix.toolchain }}
       ARCH: ${{ matrix.arch }}
+      PGO: "false"
     steps:
       - uses: actions/checkout@v5.0.0
 
@@ -364,6 +376,101 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: eden-windows-${{ matrix.toolchain }}-installer-${{ matrix.arch }}
+          path: installer/artifacts/
+
+      - name: Save cpm cache
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
+
+  windows-pgo:
+    if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows-pgo'
+    runs-on: ${{ matrix.runs-on }}
+    name: "Windows PGO ${{ matrix.toolchain }} (${{ matrix.arch }})"
+    continue-on-error: true
+    strategy:
+      matrix:
+        include:
+           - toolchain: clang
+             arch: x86_64
+             runs-on: windows-2022
+           - toolchain: clang
+             arch: arm64
+             runs-on: windows-11-arm
+    env:
+      TOOLCHAIN: ${{ matrix.toolchain }}
+      ARCH: ${{ matrix.arch }}
+      PGO: "true"
+    steps:
+      - uses: actions/checkout@v5.0.0
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4.3.0
+        with:
+          version: '6.9.1'
+
+      - name: Install vulkan-sdk
+        shell: powershell
+        run: |
+          ./install-vulkan-sdk.ps1
+          
+      - name: Pull Eden with submodules
+        shell: bash
+        run: |
+          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
+            echo "Using mirror instead..."
+            rm -rf ./eden || true
+            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
+          fi
+          cd ./eden
+          git submodule update --init --recursive
+          echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
+          echo "VERSION=$(git rev-list --count HEAD)"
+
+      - name: Restore cpm cache
+        uses: actions/cache/restore@v4
+        id: restore-cpm-cache
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+            ${{ github.workspace }}/eden/build/_deps/*-build
+          key: ${{ runner.os }}-cpm-pgo-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cpm-pgo-${{ matrix.toolchain }}-${{ matrix.arch }}-
+
+      - name: Compile Eden Windows
+        shell: bash
+        run: |
+          chmod +x ./eden-windows.sh
+          ./eden-windows.sh
+
+      - name: Generate installer
+        shell: cmd
+        working-directory: ${{ github.workspace }}/installer
+        run: |
+          makensis /DPRODUCT_TOOLCHAIN=PGO-${{ matrix.toolchain }} /DPRODUCT_VARIANT=${{ matrix.arch }} /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
+          mkdir artifacts 2>nul
+          move /y *.exe artifacts\
+
+      - name: Upload Eden 7z
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: eden-windows-pgo-${{ matrix.toolchain }}-7z-${{ matrix.arch }}
+          path: eden/build/artifacts/
+
+      - name: Upload Eden installer
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: eden-windows-pgo-${{ matrix.toolchain }}-installer-${{ matrix.arch }}
           path: installer/artifacts/
 
       - name: Save cpm cache
@@ -533,7 +640,7 @@ jobs:
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
     name: "release"
-    needs: [info, appimage, windows, macos, android, freebsd]
+    needs: [info, appimage, windows, windows-pgo, macos, android, freebsd]
     permissions:
       actions: read
       security-events: write
@@ -542,135 +649,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v5.0.0
         with:
-          name: eden-steamdeck-mesa-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-steamdeck-mesa-appbundle
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-steamdeck-light-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-rog-mesa-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-rog-mesa-appbundle
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-rog-light-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-common-mesa-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-common-mesa-appbundle
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-common-light-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-legacy-mesa-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-legacy-mesa-appbundle
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-legacy-light-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-aarch64-mesa-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-aarch64-mesa-appbundle
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-aarch64-light-appimage
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-android-Replace
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-android-Coexist
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-android-Optimised
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-windows-msvc-7z-x86_64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-windows-msvc-7z-arm64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-windows-msvc-installer-x86_64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-windows-msvc-installer-arm64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-windows-clang-7z-x86_64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-windows-clang-7z-arm64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-windows-clang-installer-x86_64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-windows-clang-installer-arm64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-macos-x86_64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-macos-arm64
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: eden-freebsd
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: tag
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: count
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: changelog
-
-      - uses: actions/download-artifact@v5.0.0
-        with:
-          name: source
+          pattern: "*"
+          merge-multiple: true
 
       - name: Generate changelog
         run: |

@@ -10,6 +10,7 @@ pacman -Syu --noconfirm \
 	base-devel \
 	catch2 \
 	cmake \
+ 	clang \
  	ccache \
 	ffnvcodec-headers \
 	gamemode \
@@ -20,6 +21,8 @@ pacman -Syu --noconfirm \
 	libva \
  	libvdpau \
 	libvpx \
+ 	lld \
+ 	llvm \
 	nasm \
 	ninja \
 	numactl \
