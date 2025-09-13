@@ -327,6 +327,12 @@ jobs:
         shell: powershell
         run: |
           ./install-vulkan-sdk.ps1
+
+      - name: Force Clang 20
+        if: matrix.toolchain == 'clang'
+        shell: bash
+        run: |
+          echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
           
       - name: Pull Eden with submodules
         shell: bash
@@ -422,6 +428,11 @@ jobs:
         shell: powershell
         run: |
           ./install-vulkan-sdk.ps1
+          
+      - name: Force Clang 20
+        shell: bash
+        run: |
+          echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
           
       - name: Pull Eden with submodules
         shell: bash
