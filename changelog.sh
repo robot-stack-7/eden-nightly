@@ -41,7 +41,8 @@ echo "**These builds are experimental and may be unstable. Use them at your own 
 echo >> "$CHANGELOG_FILE"
 echo "> [!IMPORTANT]" >> "$CHANGELOG_FILE"
 echo "> See the **[Release Overview](https://github.com/pflyly/eden-nightly?tab=readme-ov-file#release-overview)** section for detailed differences between builds." >> "$CHANGELOG_FILE"
-echo "> Newly added PGO optimized builds may boost fps performance for about 5~10%, welcome to test!" >> "$CHANGELOG_FILE"
+echo ">" >> "$CHANGELOG_FILE"
+echo  -e "> **PGO-optimized** builds are now available, offering up to **5–10%** higher FPS. Test them out!\n>**Soon, we’ll release only PGO builds whenever possible.**" >> "$CHANGELOG_FILE"
 echo >> "$CHANGELOG_FILE"
 
 # Add changelog section

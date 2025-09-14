@@ -25,7 +25,15 @@ This repository provides **unofficial nightly releases** of **Eden** for the fol
 >**These builds are experimental and may be unstable. Use them at your own risk, and please do not report issues from these builds to the official channels unless confirmed on official releases.**
 
 ---------------------------------------------------------------
+### 🚀 PGO Optimized Builds
 
+Profile-Guided Optimization (**PGO**) is now being tested via clang for Eden nightly.  
+PGO builds can improve runtime performance by **5–10% FPS** compared to non-PGO builds, depending on the game and workload.
+
+For now, PGO builds are **experimental** and provided alongside regular builds.  
+Once stabilized and confirmed, **only PGO optimized builds will be released whenever possible**.
+
+---------------------------------------------------------------
 ### 🐧 Linux Builds
 
 The builds for Linux are built with several CPU-specific compliler optimization flags targeting:

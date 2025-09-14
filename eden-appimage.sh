@@ -99,9 +99,6 @@ case "$1" in
         ;;
 esac
 
-AI_UPINFO="gh-releases-zsync|$(echo "$GITHUB_REPOSITORY" | tr '/' '|')|latest|*$ARCH.AppImage.zsync"
-AB_UPINFO="gh-releases-zsync|$(echo "$GITHUB_REPOSITORY" | tr '/' '|')|latest|*$ARCH.dwfs.AppBundle.zsync"
-
 cd ./eden
 COUNT="$(git rev-list --count HEAD)"
 DATE="$(date +"%d_%m_%Y")"
@@ -163,18 +160,11 @@ chmod +x ./uruntime
 wget -q "$PELF" -O ./pelf
 chmod +x ./pelf
 
-# Add update info to runtime
-echo "Adding update information \"$AI_UPINFO\" to runtime..."
-./uruntime --appimage-addupdinfo "$AI_UPINFO"
-
 # Turn AppDir into appimage and appbundle, upload seperately
 echo "Generating AppImage with mesa"
 MESA_APPIMAGE="Eden-${COUNT}-${TARGET}-${ARCH}.AppImage"
 ./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B6 \
 --header uruntime -i ./eden/build/mesa/AppDir -o "$MESA_APPIMAGE"
-
-echo "Generating zsync file for $MESA_APPIMAGE"
-zsyncmake -v "$MESA_APPIMAGE" -u "$MESA_APPIMAGE"
 
 mkdir -p mesa
 mv -v "${MESA_APPIMAGE}"* mesa/
@@ -182,10 +172,7 @@ mv -v "${MESA_APPIMAGE}"* mesa/
 echo "Generating AppBundle...(Go runtime)"
 APPBUNDLE="Eden-${COUNT}-${TARGET}-${ARCH}.dwfs.AppBundle"
 ln -sfv ./eden/build/mesa/AppDir/eden.svg ./eden/build/mesa/AppDir/.DirIcon.svg
-./pelf --add-appdir ./eden/build/mesa/AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B6" --output-to "$APPBUNDLE" --add-updinfo "$AB_UPINFO"
-
-echo "Generating zsync file for $APPBUNDLE"
-zsyncmake -v "$APPBUNDLE" -u "$APPBUNDLE"
+./pelf --add-appdir ./eden/build/mesa/AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B6" --output-to "$APPBUNDLE"
 
 mkdir -p bundle
 mv -v "${APPBUNDLE}"* bundle/
@@ -194,9 +181,6 @@ echo "Generating AppImage without mesa"
 LIGHT_APPIMAGE="Eden-${COUNT}-${TARGET}-light-${ARCH}.AppImage"
 ./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B6 \
 --header uruntime -i ./eden/build/light/AppDir -o "$LIGHT_APPIMAGE"
-
-echo "Generating zsync file for $LIGHT_APPIMAGE"
-zsyncmake -v "$LIGHT_APPIMAGE" -u "$LIGHT_APPIMAGE"
 
 mkdir -p light
 mv -v "${LIGHT_APPIMAGE}"* light/
