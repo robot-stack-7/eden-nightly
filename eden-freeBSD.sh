@@ -11,6 +11,9 @@ COUNT="$(git rev-list --count HEAD)"
 # hook the updater to check my repo
 git apply ../patches/update.patch
 
+# don't use bundled libusb
+sed -i '' 's/PLATFORM_SUN OR PLATFORM_OPENBSD OR PLATFORM_FREEBSD/PLATFORM_SUN OR PLATFORM_OPENBSD/' externals/libusb/CMakeLists.txt
+
 mkdir -p build
 cd build
 cmake .. -GNinja \
@@ -19,7 +22,6 @@ cmake .. -GNinja \
     -DYUZU_ENABLE_LTO=ON \
     -DYUZU_USE_BUNDLED_QT=OFF \
     -DYUZU_USE_CPM=ON \
-    -DYUZU_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES=ON \
     -DENABLE_QT_TRANSLATION=ON \
     -DENABLE_QT_UPDATE_CHECKER=ON \
     -DUSE_DISCORD_PRESENCE=OFF \

@@ -10,12 +10,12 @@ declare -a EXTRA_CMAKE_FLAGS=()
 patch -p1 < ../patches/update.patch
 
 if [[ "${TOOLCHAIN}" == "clang" ]]; then
-    if [[ "${PGO}" == "true" ]]; then
+    if [[ "${TARGET}" == "PGO" ]]; then
         EXTRA_CMAKE_FLAGS+=(
             "-DCMAKE_C_COMPILER=clang-cl"
             "-DCMAKE_CXX_COMPILER=clang-cl"
-            "-DCMAKE_CXX_FLAGS=-O3 -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -Wno-profile-instr-unprofiled"
-            "-DCMAKE_C_FLAGS=-O3 -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -Wno-profile-instr-unprofiled"
+            "-DCMAKE_CXX_FLAGS=-O3 -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
+            "-DCMAKE_C_FLAGS=-O3 -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
         )
     else
         EXTRA_CMAKE_FLAGS+=(
@@ -33,7 +33,8 @@ else
 fi
 
 COUNT="$(git rev-list --count HEAD)"
-if [[ "${PGO}" == "true" ]]; then
+
+if [[ "${TARGET}" == "PGO" ]]; then
     EXE_NAME="Eden-${COUNT}-Windows-PGO-${TOOLCHAIN}-${ARCH}"
 else
     EXE_NAME="Eden-${COUNT}-Windows-${TOOLCHAIN}-${ARCH}"

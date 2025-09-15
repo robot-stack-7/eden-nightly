@@ -1,4 +1,4 @@
-name: Build Eden Nightly
+name: Build
 concurrency:
   group: build-eden-${{ github.ref }}-${{ github.event.inputs.job_to_run || 'all' }}
   cancel-in-progress: true
@@ -8,11 +8,10 @@ on:
     inputs:
       job_to_run:
         type: choice
-        description: '选择要运行的编译任务'
+        description: 'Choose target build platform'
         options:
           - all
           - windows
-          - windows-pgo
           - appimage
           - macos
           - android
@@ -289,27 +288,39 @@ jobs:
   windows:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows'
     runs-on: ${{ matrix.runs-on }}
-    name: "Windows ${{ matrix.toolchain }} (${{ matrix.arch }})"
+    name: "Windows ${{ matrix.target }} ${{ matrix.toolchain }} (${{ matrix.arch }})"
     continue-on-error: true
     strategy:
       matrix:
         include:
            - toolchain: msvc
+             target: normal
              arch: x86_64
              runs-on: windows-2022
            - toolchain: msvc
+             target: normal
              arch: arm64
              runs-on: windows-11-arm
            - toolchain: clang
+             target: normal
              arch: x86_64
              runs-on: windows-2022
            - toolchain: clang
+             target: normal
+             arch: arm64
+             runs-on: windows-11-arm
+           - toolchain: clang
+             target: PGO
+             arch: x86_64
+             runs-on: windows-2022
+           - toolchain: clang
+             target: PGO
              arch: arm64
              runs-on: windows-11-arm
     env:
       TOOLCHAIN: ${{ matrix.toolchain }}
       ARCH: ${{ matrix.arch }}
-      PGO: "false"
+      TARGET: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v5.0.0
 
@@ -345,7 +356,6 @@ jobs:
           cd ./eden
           git submodule update --init --recursive
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
-          echo "VERSION=$(git rev-list --count HEAD)"
 
       - name: Restore cpm cache
         uses: actions/cache/restore@v4
@@ -354,9 +364,9 @@ jobs:
           path: |
             ${{ github.workspace }}/eden/.cache
             ${{ github.workspace }}/eden/build/_deps/*-build
-          key: ${{ runner.os }}-cpm-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
+          key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-cpm-${{ matrix.toolchain }}-${{ matrix.arch }}-
+            ${{ runner.os }}-cpm-${{ matrix.target }}-${{ matrix.toolchain }}-${{ matrix.arch }}-
 
       - name: Compile Eden Windows
         shell: bash
@@ -368,120 +378,22 @@ jobs:
         shell: cmd
         working-directory: ${{ github.workspace }}/installer
         run: |
-          makensis /DPRODUCT_TOOLCHAIN=${{ matrix.toolchain }} /DPRODUCT_VARIANT=${{ matrix.arch }} /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
+          set TOOLCHAIN=%TOOLCHAIN%
+          if /I "%TARGET%"=="PGO" set TOOLCHAIN=PGO-%TOOLCHAIN%
+          makensis /DPRODUCT_TOOLCHAIN=%TOOLCHAIN% /DPRODUCT_VARIANT=%ARCH% /DPRODUCT_VERSION=%VERSION% eden.nsi
           mkdir artifacts 2>nul
           move /y *.exe artifacts\
 
       - name: Upload Eden 7z
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-windows-${{ matrix.toolchain }}-7z-${{ matrix.arch }}
+          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-7z-${{ matrix.arch }}
           path: eden/build/artifacts/
 
       - name: Upload Eden installer
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-windows-${{ matrix.toolchain }}-installer-${{ matrix.arch }}
-          path: installer/artifacts/
-
-      - name: Save cpm cache
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
-          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
-
-  windows-pgo:
-    if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows-pgo'
-    runs-on: ${{ matrix.runs-on }}
-    name: "Windows PGO ${{ matrix.toolchain }} (${{ matrix.arch }})"
-    continue-on-error: true
-    strategy:
-      matrix:
-        include:
-           - toolchain: clang
-             arch: x86_64
-             runs-on: windows-2022
-           - toolchain: clang
-             arch: arm64
-             runs-on: windows-11-arm
-    env:
-      TOOLCHAIN: ${{ matrix.toolchain }}
-      ARCH: ${{ matrix.arch }}
-      PGO: "true"
-    steps:
-      - uses: actions/checkout@v5.0.0
-
-      - name: Set up MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: ${{ matrix.arch }}
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4.3.0
-        with:
-          version: '6.9.1'
-
-      - name: Install vulkan-sdk
-        shell: powershell
-        run: |
-          ./install-vulkan-sdk.ps1
-          
-      - name: Force Clang 20
-        shell: bash
-        run: |
-          echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
-          
-      - name: Pull Eden with submodules
-        shell: bash
-        run: |
-          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-          fi
-          cd ./eden
-          git submodule update --init --recursive
-          echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
-          echo "VERSION=$(git rev-list --count HEAD)"
-
-      - name: Restore cpm cache
-        uses: actions/cache/restore@v4
-        id: restore-cpm-cache
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
-          key: ${{ runner.os }}-cpm-pgo-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-cpm-pgo-${{ matrix.toolchain }}-${{ matrix.arch }}-
-
-      - name: Compile Eden Windows
-        shell: bash
-        run: |
-          chmod +x ./eden-windows.sh
-          ./eden-windows.sh
-
-      - name: Generate installer
-        shell: cmd
-        working-directory: ${{ github.workspace }}/installer
-        run: |
-          makensis /DPRODUCT_TOOLCHAIN=PGO-${{ matrix.toolchain }} /DPRODUCT_VARIANT=${{ matrix.arch }} /DPRODUCT_VERSION=${{ env.VERSION }} eden.nsi
-          mkdir artifacts 2>nul
-          move /y *.exe artifacts\
-
-      - name: Upload Eden 7z
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: eden-windows-pgo-${{ matrix.toolchain }}-7z-${{ matrix.arch }}
-          path: eden/build/artifacts/
-
-      - name: Upload Eden installer
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: eden-windows-pgo-${{ matrix.toolchain }}-installer-${{ matrix.arch }}
+          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-installer-${{ matrix.arch }}
           path: installer/artifacts/
 
       - name: Save cpm cache
@@ -651,7 +563,7 @@ jobs:
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
     name: "release"
-    needs: [info, appimage, windows, windows-pgo, macos, android, freebsd]
+    needs: [info, appimage, windows, macos, android, freebsd]
     permissions:
       actions: read
       security-events: write

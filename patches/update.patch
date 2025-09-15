@@ -81,10 +81,10 @@ index c8edb90268..a723bc174a 100644
  
  AboutDialog::~AboutDialog() = default;
 diff --git a/src/yuzu/main.cpp b/src/yuzu/main.cpp
-index c6e004813c..6397232fc9 100644
+index d7d4e94ab7..4442e122cc 100644
 --- a/src/yuzu/main.cpp
 +++ b/src/yuzu/main.cpp
-@@ -5010,11 +5010,11 @@ void GMainWindow::OnEmulatorUpdateAvailable() {
+@@ -4193,11 +4193,11 @@ void GMainWindow::OnEmulatorUpdateAvailable() {
      update_prompt.addButton(QMessageBox::Yes);
      update_prompt.addButton(QMessageBox::Ignore);
      update_prompt.setText(
@@ -98,7 +98,7 @@ index c6e004813c..6397232fc9 100644
                   version_string));
      }
  }
-@@ -5028,7 +5028,7 @@ void GMainWindow::UpdateWindowTitle(std::string_view title_name, std::string_vie
+@@ -4211,7 +4211,7 @@ void GMainWindow::UpdateWindowTitle(std::string_view title_name, std::string_vie
  
      std::string yuzu_title;
      if (Common::g_is_dev_build) {

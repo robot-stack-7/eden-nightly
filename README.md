@@ -69,7 +69,7 @@ Shares the same application ID as the official Eden release. Installing this ver
 
 - **Coexist** Build
   
-Uses a nightly application ID, allowing it to coexist with the official Eden release. It appears as "**Eden unofficial**" on the home screen, and "**Eden Unofficial**" on the main screen of eden.
+Uses a nightly application ID, allowing it to coexist with the official Eden release. It appears as "**Eden Nightly**" on the home screen, and "**Eden Nightly**" on the main screen of eden.
 
 - **Optimised** Build
   
