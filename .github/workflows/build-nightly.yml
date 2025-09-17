@@ -101,10 +101,6 @@ jobs:
     continue-on-error: true
     container: ghcr.io/pkgforge-dev/archlinux:latest
     name: "Appimage (${{ matrix.target }})"
-    env:
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_COMPILERCHECK: content
-      CCACHE_SLOPPINESS: time_macros
     steps:
       - uses: actions/checkout@v5.0.0
         with:
@@ -135,26 +131,6 @@ jobs:
           key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpm-${{ matrix.target }}-
-
-      - name: Restore ccache for ${{ matrix.target }}
-        if: ${{ matrix.target != 'aarch64' }}
-        uses: actions/cache/restore@v4
-        id: restore-ccache-nonaarch64
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-ccache-${{ matrix.target }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-${{ matrix.target }}-
-
-      - name: Restore sccache for ${{ matrix.target }}
-        if: ${{ matrix.target == 'aarch64' }}
-        uses: actions/cache/restore@v4
-        id: restore-sccache-aarch64
-        with:
-          path: ~/.cache/sccache/
-          key: ${{ runner.os }}-sccache-${{ matrix.target }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-sccache-${{ matrix.target }}-
 
       - name: Compile Eden ${{ matrix.target }}
         run: |
@@ -187,20 +163,6 @@ jobs:
             ${{ github.workspace }}/eden/.cache
             ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
-
-      - name: Save ccache for ${{ matrix.target }}
-        if: ${{ matrix.target != 'aarch64' && github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ steps.restore-ccache-nonaarch64.outputs.cache-primary-key }}
-
-      - name: Save sccache for ${{ matrix.target }}
-        if: ${{ matrix.target == 'aarch64' && github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cache/sccache/
-          key: ${{ steps.restore-sccache-aarch64.outputs.cache-primary-key }}
 
   android:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'android'

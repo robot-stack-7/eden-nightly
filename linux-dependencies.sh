@@ -11,7 +11,6 @@ pacman -Syu --noconfirm \
 	catch2 \
 	cmake \
  	clang \
- 	ccache \
 	ffnvcodec-headers \
 	gamemode \
 	git \
@@ -33,7 +32,6 @@ pacman -Syu --noconfirm \
 	qt6ct \
 	qt6-tools \
 	qt6-wayland \
-  	sccache \
  	sdl3 \
 	strace \
 	unzip \
