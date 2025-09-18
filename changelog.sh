@@ -110,7 +110,7 @@ echo "| Windows (MSVC) | **7z**<br>───────────────
 **Installer**<br>────────────────<br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-x86_64-Installer.exe)<br><br>\
 [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-arm64-Installer.exe) |" >> "$CHANGELOG_FILE"
-echo "| Windows (CLANG) | **7z**<br>────────────────<br>\
+echo "| Windows (CLANG)<br>**Experimental**<br> | **7z**<br>────────────────<br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-x86_64.7z)<br><br>\
 [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-arm64.7z)<br><br>\
 **Installer**<br>────────────────<br>\

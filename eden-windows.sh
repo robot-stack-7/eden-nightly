@@ -53,13 +53,14 @@ cmake .. -G Ninja \
     -DENABLE_QT_UPDATE_CHECKER=ON \
     -DUSE_DISCORD_PRESENCE=OFF \
     -DYUZU_CMD=OFF \
+    -DYUZU_ROOM=ON \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     "${EXTRA_CMAKE_FLAGS[@]}"
 ninja
 
 # Gather dependencies
-windeployqt6 --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir bin ./bin/eden.exe
+windeployqt --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir bin ./bin/eden.exe
 
 # Delete un-needed debug files 
 find bin -type f -name "*.pdb" -exec rm -fv {} +

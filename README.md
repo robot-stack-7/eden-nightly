@@ -29,12 +29,14 @@ This repository provides **unofficial nightly releases** of **Eden** for the fol
 
 Profile-Guided Optimization (**PGO**) is now being tested via clang for Eden nightly.  
 PGO builds can improve runtime performance by **5–10% FPS** compared to non-PGO builds, depending on the game and workload.
+
 <p align="center">
   <img src="https://github.com/pflyly/eden-nightly/blob/main/pgo/TOTK1.jpg" width="400">
   <img src="https://github.com/pflyly/eden-nightly/blob/main/pgo/TOTK2.jpg" width="400">
   <img src="https://github.com/pflyly/eden-nightly/blob/main/pgo/TOTK3.jpg" width="400">
   <img src="https://github.com/pflyly/eden-nightly/blob/main/pgo/TOTK4.jpg" width="400">
 </p>
+
 For now, PGO builds are **experimental** and provided alongside regular builds.  
 Once stabilized and confirmed, **only PGO optimized builds will be released whenever possible**.
 
