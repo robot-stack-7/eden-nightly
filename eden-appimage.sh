@@ -13,10 +13,12 @@ PELF="https://github.com/xplshn/pelf/releases/latest/download/pelf_$ARCH"
 case "$1" in
     steamdeck)
         echo "Making Eden Optimized Build for Steam Deck"
-        CMAKE_CXX_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -fuse-ld=lld -w"
-        CMAKE_C_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -fuse-ld=lld -w"
+        CMAKE_CXX_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -fuse-ld=mold -w"
+        CMAKE_C_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -fuse-ld=mold -w"
  		PROFILE="steamdeck"
         TARGET="Steamdeck"
+		CC="gcc"
+		CXX="g++"
         ;;
     steamdeck-pgo)
         echo "Making Eden PGO_Optimized Build for Steam Deck"
@@ -24,13 +26,17 @@ case "$1" in
         CMAKE_C_FLAGS="-march=znver2 -mtune=znver2 -O3 -pipe -flto=auto -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
  		PROFILE="steamdeck"
         TARGET="Steamdeck-PGO"
+  		CC="clang"
+		CXX="clang++"
         ;;
     rog)
         echo "Making Eden Optimized Build for ROG ALLY X"
-        CMAKE_CXX_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -fuse-ld=lld -w"
-        CMAKE_C_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -fuse-ld=lld -w"
+        CMAKE_CXX_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -fuse-ld=mold -w"
+        CMAKE_C_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -fuse-ld=mold -w"
  		PROFILE="steamdeck"
         TARGET="ROG_ALLY"
+		CC="gcc"
+		CXX="g++"
         ;;
     rog-pgo)
         echo "Making Eden PGO Optimized Build for ROG ALLY X"
@@ -38,13 +44,17 @@ case "$1" in
         CMAKE_C_FLAGS="-march=znver4 -mtune=znver4 -O3 -pipe -flto=auto -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
  		PROFILE="steamdeck"
         TARGET="ROG_ALLY-PGO"
+  		CC="clang"
+		CXX="clang++"
         ;;
     common)
         echo "Making Eden Optimized Build for Modern CPUs"
-        CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=lld -w"
-        CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=lld -w"
+        CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=mold -w"
+        CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=mold -w"
         ARCH="${ARCH}_v3"
         TARGET="Common"
+		CC="gcc"
+		CXX="g++"
         ;;
     common-pgo)
         echo "Making Eden PGO Optimized Build for Modern CPUs"
@@ -52,31 +62,41 @@ case "$1" in
         CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
         ARCH="${ARCH}_v3"
         TARGET="Common-PGO"
+  		CC="clang"
+		CXX="clang++"
         ;;
     legacy)
         echo "Making Eden Optimized Build for Legacy CPUs"
-        CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fuse-ld=lld -w"
-        CMAKE_C_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fuse-ld=lld -w"
+        CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fuse-ld=mold -w"
+        CMAKE_C_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fuse-ld=mold -w"
         TARGET="Legacy"
+		CC="gcc"
+		CXX="g++"
         ;;
     legacy-pgo)
         echo "Making Eden Optimized Build for Legacy CPUs"
         CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
         CMAKE_C_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
         TARGET="Legacy-PGO"
+  		CC="clang"
+		CXX="clang++"
         ;;
     aarch64)
         echo "Making Eden Optimized Build for AArch64"
-        CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fuse-ld=lld -w"
-        CMAKE_C_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fuse-ld=lld -w"
+        CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fuse-ld=mold -w"
+        CMAKE_C_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fuse-ld=mold -w"
 		OPENSSL="OFF"
         TARGET="Linux"
+		CC="gcc"
+		CXX="g++"
         ;;
     aarch64-pgo)
         echo "Making Eden PGO Optimized Build for AArch64"
         CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
         CMAKE_C_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
 		OPENSSL="OFF"
+  		CC="clang"
+		CXX="clang++"
         TARGET="Linux-PGO"
         ;;
 esac
@@ -106,11 +126,11 @@ cmake .. -GNinja \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_SYSTEM_PROCESSOR="$(uname -m)" \
     -DCMAKE_BUILD_TYPE=Release \
-	-DCMAKE_C_COMPILER=clang \
- 	-DCMAKE_CXX_COMPILER=clang++ \
+	-DCMAKE_C_COMPILER="${CC:-}" \
+ 	-DCMAKE_CXX_COMPILER="${CXX:-}" \
     -DCMAKE_EXE_LINKER_FLAGS="-Wl,--as-needed" \
-    -DYUZU_SYSTEM_PROFILE="${PROFILE:-}" \
-	-DYUZU_USE_BUNDLED_OPENSSL="${OPENSSL:-}" \
+    ${PROFILE:+-DYUZU_SYSTEM_PROFILE="$PROFILE"} \
+	${OPENSSL:+-DYUZU_USE_BUNDLED_OPENSSL="$OPENSSL"} \
     ${CMAKE_CXX_FLAGS:+-DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS"} \
     ${CMAKE_C_FLAGS:+-DCMAKE_C_FLAGS="$CMAKE_C_FLAGS"}
 ninja

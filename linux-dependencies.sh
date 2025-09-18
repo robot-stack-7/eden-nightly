@@ -25,6 +25,7 @@ pacman -Syu --noconfirm \
 	nasm \
 	ninja \
 	numactl \
+ 	mold \
 	patchelf \
 	pulseaudio \
 	pulseaudio-alsa \
