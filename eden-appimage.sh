@@ -153,13 +153,9 @@ cmake .. -GNinja \
 ninja
 
 cd ../..
-# Use sharun to generate AppDir with mesa drivers
+# Use sharun to generate AppDir
 chmod +x ./sharun.sh
 ./sharun.sh ./eden/build
-
-# Use linuxdeploy to generate AppDir without mesa drivers
-chmod +x ./linuxdeploy.sh
-./linuxdeploy.sh ./eden/build
 
 # Prepare uruntime and pelf
 wget -q "$URUNTIME" -O ./uruntime
@@ -168,28 +164,20 @@ wget -q "$PELF" -O ./pelf
 chmod +x ./pelf
 
 # Turn AppDir into appimage and appbundle, upload seperately
-echo "Generating AppImage with mesa"
-MESA_APPIMAGE="Eden-${COUNT}-${TARGET}-${ARCH}.AppImage"
+echo "Generating AppImage"
+APPIMAGE="Eden-${COUNT}-${TARGET}-${ARCH}.AppImage"
 ./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B6 \
---header uruntime -i ./eden/build/mesa/AppDir -o "$MESA_APPIMAGE"
+--header uruntime -i ./eden/build/AppDir -o "$APPIMAGE"
 
-mkdir -p mesa
-mv -v "${MESA_APPIMAGE}"* mesa/
+mkdir -p appimage
+mv -v "${APPIMAGE}"* appimage/
 
 echo "Generating AppBundle...(Go runtime)"
 APPBUNDLE="Eden-${COUNT}-${TARGET}-${ARCH}.dwfs.AppBundle"
-ln -sfv ./eden/build/mesa/AppDir/eden.svg ./eden/build/mesa/AppDir/.DirIcon.svg
-./pelf --add-appdir ./eden/build/mesa/AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B6" --output-to "$APPBUNDLE"
+ln -sfv ./eden/build/AppDir/eden.svg ./eden/build/AppDir/.DirIcon.svg
+./pelf --add-appdir ./eden/build/AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B6" --output-to "$APPBUNDLE"
 
-mkdir -p bundle
-mv -v "${APPBUNDLE}"* bundle/
-
-echo "Generating AppImage without mesa"
-LIGHT_APPIMAGE="Eden-${COUNT}-${TARGET}-light-${ARCH}.AppImage"
-./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B6 \
---header uruntime -i ./eden/build/light/AppDir -o "$LIGHT_APPIMAGE"
-
-mkdir -p light
-mv -v "${LIGHT_APPIMAGE}"* light/
+mkdir -p appbundle
+mv -v "${APPBUNDLE}"* appbundle/
 
 echo "All Done!"

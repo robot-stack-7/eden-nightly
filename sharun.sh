@@ -8,13 +8,13 @@ export ARCH="$(uname -m)"
 SHARUN="https://github.com/VHSgunzo/sharun/releases/latest/download/sharun-${ARCH}-aio"
 
 BUILD_DIR=$(realpath "$1")
-APPDIR="${BUILD_DIR}/mesa/AppDir"
+APPDIR="${BUILD_DIR}/AppDir"
 
 mkdir -p "${APPDIR}"
 cd "${APPDIR}"
 
-cp -v ../../../dist/dev.eden_emu.eden.desktop .
-cp -v ../../../dist/dev.eden_emu.eden.svg .
+cp -v ../../dist/dev.eden_emu.eden.desktop .
+cp -v ../../dist/dev.eden_emu.eden.svg .
 ln -sfv ./dev.eden_emu.eden.svg ./.DirIcon
 
 wget --retry-connrefused --tries=30 "$SHARUN" -O ./sharun-aio

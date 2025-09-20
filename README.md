@@ -55,8 +55,6 @@ AppImages built using [**Sharun**](https://github.com/VHSgunzo/sharun) are bundl
 
 A newly added **AppBundle** version, built with [**pelf**](https://github.com/xplshn/pelf), serves as an alternative to AppImage. It's a lightweight format written in Go and intended for broader Linux compatibility.
 
-A **Light version** Appimage is also available, built with **linuxdeploy**. It does **not** include Mesa drivers, resulting in a more lightweight build that relies on the system’s native graphics drivers — similar to many other emulators.
-
 ---------------------------------------------------------------
 
 ### FreeBSD Builds

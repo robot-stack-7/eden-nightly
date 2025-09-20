@@ -137,23 +137,17 @@ jobs:
           chmod +x ./eden-appimage.sh
           ./eden-appimage.sh ${{ matrix.target }}
 
-      - name: Upload appimage with mesa
+      - name: Upload appimage
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-${{ matrix.target}}-mesa-appimage
-          path: mesa
+          name: eden-${{ matrix.target}}-appimage
+          path: appimage
 
-      - name: Upload appbundle with mesa
+      - name: Upload appbundle
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-${{ matrix.target}}-mesa-appbundle
-          path: bundle
-
-      - name: Upload appimage light
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: eden-${{ matrix.target}}-light-appimage
-          path: light
+          name: eden-${{ matrix.target}}-appbundle
+          path: appbundle
 
       - name: Save cpm cache for ${{ matrix.target }}
         if: ${{ github.ref_name == 'main' }}
