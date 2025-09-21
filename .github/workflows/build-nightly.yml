@@ -141,13 +141,13 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: eden-${{ matrix.target}}-appimage
-          path: appimage
+          path: eden/appimage
 
       - name: Upload appbundle
         uses: actions/upload-artifact@v4.6.2
         with:
           name: eden-${{ matrix.target}}-appbundle
-          path: appbundle
+          path: eden/appbundle
 
       - name: Save cpm cache for ${{ matrix.target }}
         if: ${{ github.ref_name == 'main' }}

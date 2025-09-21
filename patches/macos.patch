@@ -1,5 +1,17 @@
+diff --git a/src/core/reporter.cpp b/src/core/reporter.cpp
+index 1723636811..d4cd77c0fd 100644
+--- a/src/core/reporter.cpp
++++ b/src/core/reporter.cpp
+@@ -6,6 +6,7 @@
+ 
+ #include <ctime>
+ #include <fstream>
++#include <sstream>
+ #include <iomanip>
+ 
+ #include <fmt/chrono.h>
 diff --git a/src/video_core/renderer_vulkan/vk_texture_cache.cpp b/src/video_core/renderer_vulkan/vk_texture_cache.cpp
-index eda9ff2a5a..81a719da6c 100644
+index 466be26577..7f3c3f2a51 100644
 --- a/src/video_core/renderer_vulkan/vk_texture_cache.cpp
 +++ b/src/video_core/renderer_vulkan/vk_texture_cache.cpp
 @@ -1378,8 +1378,8 @@ void TextureCacheRuntime::CopyImage(Image& dst, Image& src,

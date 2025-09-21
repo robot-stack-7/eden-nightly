@@ -1,48 +1,39 @@
 diff --git a/CMakeModules/GenerateSCMRev.cmake b/CMakeModules/GenerateSCMRev.cmake
-index bcb5dc466a..e87c397d5f 100644
+index 2d7081b7db..eb3794459b 100644
 --- a/CMakeModules/GenerateSCMRev.cmake
 +++ b/CMakeModules/GenerateSCMRev.cmake
-@@ -3,7 +3,7 @@
+@@ -8,19 +8,19 @@
+ include(GetSCMRev)
  
- # Gets a UTC timestamp and sets the provided variable to it
  function(get_timestamp _var)
 -    string(TIMESTAMP timestamp UTC)
 +    string(TIMESTAMP timestamp "%Y-%m-%d" UTC)
      set(${_var} "${timestamp}" PARENT_SCOPE)
  endfunction()
  
-@@ -19,10 +19,11 @@ if (NOT GIT_BRANCH)
-   git_branch_name(GIT_BRANCH)
- endif()
  get_timestamp(BUILD_DATE)
 +git_count(GIT_COUNT)
  
- git_get_exact_tag(GIT_TAG --tags)
- if (GIT_TAG MATCHES "NOTFOUND")
--  set(BUILD_VERSION "${GIT_DESC}")
+ if (DEFINED GIT_RELEASE)
+   set(BUILD_VERSION "${GIT_TAG}")
+   set(GIT_REFSPEC "${GIT_RELEASE}")
+   set(IS_DEV_BUILD false)
+ else()
+-  string(SUBSTRING ${GIT_COMMIT} 0 10 BUILD_VERSION)
+-  set(BUILD_VERSION "${BUILD_VERSION}-${GIT_REFSPEC}")
 +  set(BUILD_VERSION "${BUILD_DATE}-${GIT_COUNT}")
    set(IS_DEV_BUILD true)
- else()
-   set(BUILD_VERSION ${GIT_TAG})
-diff --git a/externals/cmake-modules/GetGitRevisionDescription.cmake b/externals/cmake-modules/GetGitRevisionDescription.cmake
-index dab1347753..5e5724d312 100644
---- a/externals/cmake-modules/GetGitRevisionDescription.cmake
-+++ b/externals/cmake-modules/GetGitRevisionDescription.cmake
-@@ -160,3 +160,29 @@ function(git_get_exact_tag _var)
- 	git_describe(out --exact-match ${ARGN})
- 	set(${_var} "${out}" PARENT_SCOPE)
+ endif()
+ 
+diff --git a/CMakeModules/GetSCMRev.cmake b/CMakeModules/GetSCMRev.cmake
+index ee5ce6a91c..b61b8a3531 100644
+--- a/CMakeModules/GetSCMRev.cmake
++++ b/CMakeModules/GetSCMRev.cmake
+@@ -8,6 +8,23 @@ function(trim var)
+   set(${var} ${new} PARENT_SCOPE)
  endfunction()
-+
+ 
 +function(git_count _var)
-+    if(NOT GIT_FOUND)
-+        find_package(Git QUIET)
-+    endif()
-+
-+    if(NOT GIT_FOUND)
-+        set(${_var} "GIT-NOTFOUND" PARENT_SCOPE)
-+        return()
-+    endif()
-+
 +    execute_process(
 +        COMMAND "${GIT_EXECUTABLE}" rev-list --count HEAD
 +        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
@@ -58,20 +49,24 @@ index dab1347753..5e5724d312 100644
 +
 +    set(${_var} "${out}" PARENT_SCOPE)
 +endfunction()
++
+ set(TAG_FILE ${CMAKE_SOURCE_DIR}/GIT-TAG)
+ set(REF_FILE ${CMAKE_SOURCE_DIR}/GIT-REFSPEC)
+ set(COMMIT_FILE ${CMAKE_SOURCE_DIR}/GIT-COMMIT)
 diff --git a/src/yuzu/about_dialog.cpp b/src/yuzu/about_dialog.cpp
-index c8edb90268..a723bc174a 100644
+index b7c0cd58d5..9874093a90 100644
 --- a/src/yuzu/about_dialog.cpp
 +++ b/src/yuzu/about_dialog.cpp
-@@ -17,7 +17,7 @@ AboutDialog::AboutDialog(QWidget* parent)
+@@ -18,7 +18,7 @@ AboutDialog::AboutDialog(QWidget* parent)
+     static const std::string build_id = std::string{Common::g_build_id};
+     static const std::string compiler = std::string{Common::g_compiler_id};
  
-     std::string yuzu_build;
-     if (Common::g_is_dev_build) {
--        yuzu_build = fmt::format("Eden Nightly | {}-{} | {}", description, build_id, compiler);
-+        yuzu_build = fmt::format("Eden Nightly | {} | {}", description, compiler);
-     } else {
-         yuzu_build = fmt::format("Eden | {} | {}", description, compiler);
-     }
-@@ -35,7 +35,7 @@ AboutDialog::AboutDialog(QWidget* parent)
+-    static const std::string yuzu_build = fmt::format("Eden | {} | {}", description, compiler);
++    static const std::string yuzu_build = fmt::format("Eden Nightly | {} | {}", description, compiler);
+ 
+     const auto override_build = fmt::format(fmt::runtime(
+                                                 std::string(Common::g_title_bar_format_idle)),
+@@ -33,7 +33,7 @@ AboutDialog::AboutDialog(QWidget* parent)
      }
      ui->labelBuildInfo->setText(
          ui->labelBuildInfo->text().arg(QString::fromStdString(yuzu_build_version),
@@ -81,7 +76,7 @@ index c8edb90268..a723bc174a 100644
  
  AboutDialog::~AboutDialog() = default;
 diff --git a/src/yuzu/main.cpp b/src/yuzu/main.cpp
-index d7d4e94ab7..4442e122cc 100644
+index 19162a4ab7..f8628e1aa1 100644
 --- a/src/yuzu/main.cpp
 +++ b/src/yuzu/main.cpp
 @@ -4193,11 +4193,11 @@ void GMainWindow::OnEmulatorUpdateAvailable() {
@@ -98,15 +93,15 @@ index d7d4e94ab7..4442e122cc 100644
                   version_string));
      }
  }
-@@ -4211,7 +4211,7 @@ void GMainWindow::UpdateWindowTitle(std::string_view title_name, std::string_vie
+@@ -4209,7 +4209,7 @@ void GMainWindow::UpdateWindowTitle(std::string_view title_name, std::string_vie
+     static const std::string build_id = std::string{Common::g_build_id};
+     static const std::string compiler = std::string{Common::g_compiler_id};
  
-     std::string yuzu_title;
-     if (Common::g_is_dev_build) {
--        yuzu_title = fmt::format("Eden Nightly | {}-{} | {}", description, build_id, compiler);
-+        yuzu_title = fmt::format("Eden Nightly | {} | {}", description, compiler);
-     } else {
-         yuzu_title = fmt::format("Eden | {} | {}", description, compiler);
-     }
+-    static const std::string yuzu_title = fmt::format("Eden | {} | {}", description, compiler);
++    static const std::string yuzu_title = fmt::format("Eden Nightly | {} | {}", description, compiler);
+ 
+     const auto override_title =
+         fmt::format(fmt::runtime(std::string(Common::g_title_bar_format_idle)), build_id);
 diff --git a/src/yuzu/update_checker.cpp b/src/yuzu/update_checker.cpp
 index 8291987d73..b8eb4c1e1f 100644
 --- a/src/yuzu/update_checker.cpp

@@ -7,7 +7,8 @@ set -exu # -u: exit if referenced variables aren't assigned
 export APPIMAGE_EXTRACT_AND_RUN=1
 export ARCH="$(uname -m)"
 
-URUNTIME="https://github.com/VHSgunzo/uruntime/releases/latest/download/uruntime-appimage-dwarfs-$ARCH"
+SHARUN="https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/refs/heads/main/useful-tools/quick-sharun.sh"
+URUNTIME="https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/refs/heads/main/useful-tools/uruntime2appimage.sh"
 PELF="https://github.com/xplshn/pelf/releases/latest/download/pelf_$ARCH"
 
 case "$1" in
@@ -55,7 +56,6 @@ case "$1" in
         echo "Making Eden Optimized Build for Modern CPUs"
         CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=mold -w"
         CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=mold -w"
-        ARCH="${ARCH}_v3"
         TARGET="Common"
 		CC="gcc"
 		CXX="g++"
@@ -66,7 +66,6 @@ case "$1" in
         echo "Making Eden PGO Optimized Build for Modern CPUs"
         CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=thin -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
         CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=thin -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
-        ARCH="${ARCH}_v3"
         TARGET="Common-PGO"
   		CC="clang"
 		CXX="clang++"
@@ -127,7 +126,6 @@ cd build
 cmake .. -GNinja \
     -DYUZU_USE_BUNDLED_QT=OFF \
 	-DYUZU_USE_BUNDLED_FFMPEG=ON \
- 	-DYUZU_USE_BUNDLED_OPENSSL=ON \
 	-DYUZU_USE_CPM=ON \
 	-DBUILD_TESTING=OFF \
     -DYUZU_TESTS=OFF \
@@ -152,32 +150,36 @@ cmake .. -GNinja \
     ${CMAKE_C_FLAGS:+-DCMAKE_C_FLAGS="$CMAKE_C_FLAGS"}
 ninja
 
-cd ../..
 # Use sharun to generate AppDir
-chmod +x ./sharun.sh
-./sharun.sh ./eden/build
+cd ..
+export ICON="$PWD"/dist/dev.eden_emu.eden.svg
+export DESKTOP="$PWD"/dist/dev.eden_emu.eden.desktop
+export OPTIMIZE_LAUNCH=1
+export DEPLOY_OPENGL=1
+export DEPLOY_VULKAN=1
+export DEPLOY_QT=1
+export OUTNAME="Eden-${COUNT}-${TARGET}-${ARCH}.AppImage"
 
-# Prepare uruntime and pelf
-wget -q "$URUNTIME" -O ./uruntime
-chmod +x ./uruntime
-wget -q "$PELF" -O ./pelf
-chmod +x ./pelf
+wget -q --retry-connrefused --tries=30 "$SHARUN" -O ./quick-sharun
+chmod +x ./quick-sharun
+./quick-sharun ./build/bin/eden
+echo 'QT_QPA_PLATFORM=xcb' >> AppDir/.env
 
-# Turn AppDir into appimage and appbundle, upload seperately
-echo "Generating AppImage"
-APPIMAGE="Eden-${COUNT}-${TARGET}-${ARCH}.AppImage"
-./uruntime --appimage-mkdwarfs -f --set-owner 0 --set-group 0 --no-history --no-create-timestamp --compression zstd:level=22 -S26 -B6 \
---header uruntime -i ./eden/build/AppDir -o "$APPIMAGE"
+# Use uruntie to make appimage
+wget -q --retry-connrefused --tries=30 "$URUNTIME" -O ./uruntime2appimage
+chmod +x ./uruntime2appimage
+./uruntime2appimage
 
 mkdir -p appimage
-mv -v "${APPIMAGE}"* appimage/
+mv -v "${OUTNAME}" appimage/
 
-echo "Generating AppBundle...(Go runtime)"
+# Use pelf to make appbundle
+wget -q --retry-connrefused --tries=30 "$PELF" -O ./pelf
+chmod +x ./pelf
+
 APPBUNDLE="Eden-${COUNT}-${TARGET}-${ARCH}.dwfs.AppBundle"
-ln -sfv ./eden/build/AppDir/eden.svg ./eden/build/AppDir/.DirIcon.svg
-./pelf --add-appdir ./eden/build/AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B6" --output-to "$APPBUNDLE"
+ln -sfv ./AppDir/eden.svg ./AppDir/.DirIcon.svg
+./pelf --add-appdir ./AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B6" --output-to "$APPBUNDLE"
 
 mkdir -p appbundle
 mv -v "${APPBUNDLE}"* appbundle/
-
-echo "All Done!"
