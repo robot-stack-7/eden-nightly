@@ -486,7 +486,7 @@ jobs:
           restore-keys: FreeBSD-ccache-
 
       - name: Compile Eden FreeBSD
-        uses: vmactions/freebsd-vm@v1.2.3
+        uses: vmactions/freebsd-vm@v1.2.4
         with:
           usesh: true
           envs: 'CCACHE_DIR'
