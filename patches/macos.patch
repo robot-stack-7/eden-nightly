@@ -11,12 +11,12 @@ index 1723636811..d4cd77c0fd 100644
  
  #include <fmt/chrono.h>
 diff --git a/src/video_core/renderer_vulkan/vk_texture_cache.cpp b/src/video_core/renderer_vulkan/vk_texture_cache.cpp
-index 466be26577..7f3c3f2a51 100644
+index 8d1d609a35..74c04f8ee9 100644
 --- a/src/video_core/renderer_vulkan/vk_texture_cache.cpp
 +++ b/src/video_core/renderer_vulkan/vk_texture_cache.cpp
-@@ -1378,8 +1378,8 @@ void TextureCacheRuntime::CopyImage(Image& dst, Image& src,
-     // these images that aren't size-compatible
-     if (BytesPerBlock(src.info.format) != BytesPerBlock(dst.info.format)) {
+@@ -1381,8 +1381,8 @@ void TextureCacheRuntime::CopyImage(Image& dst, Image& src,
+             return;
+         }
          auto oneCopy = VideoCommon::ImageCopy{
 -            .src_offset = VideoCommon::Offset3D(0, 0, 0),
 -            .dst_offset = VideoCommon::Offset3D(0, 0, 0),
