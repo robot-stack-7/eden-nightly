@@ -1,8 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -ex
 
 export ARCH="$(uname -m)"
+export CC=clang20
+export CXX=clang++20
+export LD=ld.lld20
 
 cd ./eden
 git config --global --add safe.directory .
@@ -11,13 +14,25 @@ COUNT="$(git rev-list --count HEAD)"
 # hook the updater to check my repo
 git apply ../patches/update.patch
 
+declare -a EXTRA_CMAKE_FLAGS=()
+if [[ "${TARGET}" == "FreeBSD-PGO" ]]; then
+    EXTRA_CMAKE_FLAGS+=(
+        "-DCMAKE_CXX_FLAGS=-O3 -pipe -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+        "-DCMAKE_C_FLAGS=-O3 -pipe -fuse-ld=lld -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
+    )
+else
+    EXTRA_CMAKE_FLAGS+=(
+    "-DCMAKE_CXX_FLAGS=-O3 -pipe -fuse-ld=lld -w"
+    "-DCMAKE_C_FLAGS=-O3 -pipe -fuse-ld=lld -w"
+    )
+fi
+
 mkdir -p build
 cd build
 cmake .. -GNinja \
     -DYUZU_TESTS=OFF \
-    -DYUZU_USE_FASTER_LD=ON \
-    -DYUZU_ENABLE_LTO=ON \
     -DYUZU_USE_BUNDLED_QT=OFF \
+    -DYUZU_ENABLE_LTO=ON \
     -DYUZU_USE_CPM=ON \
     -DENABLE_QT_TRANSLATION=ON \
     -DENABLE_QT_UPDATE_CHECKER=ON \
@@ -26,14 +41,11 @@ cmake .. -GNinja \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_SYSTEM_PROCESSOR="$(uname -m)" \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS="-w" \
-    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    -DQt6_DIR=/usr/local/lib/cmake/Qt6
+    -DQt6_DIR=/usr/local/lib/cmake/Qt6 \
+    "${EXTRA_CMAKE_FLAGS[@]}"
 ninja
-ccache -s-v
 
-PKG_NAME="Eden-${COUNT}-FreeBSD-${ARCH}"
+PKG_NAME="Eden-${COUNT}-${TARGET}-${ARCH}"
 PKG_DIR="${PKG_NAME}/usr/local"
 EDEN_PATH="${PKG_DIR}/bin/eden"
 

@@ -127,7 +127,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpm-${{ matrix.target }}-
@@ -155,7 +154,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
   android:
@@ -200,7 +198,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ runner.os }}-android-cpm-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-android-cpm-${{ matrix.target }}-
@@ -231,7 +228,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
       - name: Save sccache for ${{ matrix.target }}
@@ -319,7 +315,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpm-${{ matrix.target }}-${{ matrix.toolchain }}-${{ matrix.arch }}-
@@ -358,7 +353,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
   macos:
@@ -397,7 +391,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpm-${{ matrix.target }}-
@@ -433,7 +426,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
       - name: Save ccache for ${{ matrix.target }}
@@ -449,10 +441,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [FreeBSD]
+        target: [FreeBSD, FreeBSD-PGO]
     continue-on-error: true
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
+      TARGET: ${{ matrix.target }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5.0.0
@@ -473,31 +466,23 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
-          key: FreeBSD-cpm-${{ github.sha }}
-          restore-keys: FreeBSD-cpm-
-
-      - name: Restore ccache
-        uses: actions/cache/restore@v4
-        id: restore-ccache-cache
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: FreeBSD-ccache-${{ github.sha }}
-          restore-keys: FreeBSD-ccache-
+          key: ${{ matrix.target }}-cpm-${{ github.sha }}
+          restore-keys: ${{ matrix.target }}-cpm-
 
       - name: Compile Eden FreeBSD
         uses: vmactions/freebsd-vm@v1.2.4
         with:
           usesh: true
-          envs: 'CCACHE_DIR'
+          envs: 'CCACHE_DIR TARGET'
           run: |
             chmod +x ./freeBSD-dependencies.sh ./eden-freeBSD.sh
-            ./freeBSD-dependencies.sh && ./eden-freeBSD.sh
+            ./freeBSD-dependencies.sh
+            ./eden-freeBSD.sh
 
       - name: Upload
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-freebsd
+          name: eden-${{ matrix.target }}
           path: eden/build/artifacts/
 
       - name: Save cpm cache
@@ -506,15 +491,7 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
-
-      - name: Save ccache
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ steps.restore-ccache-cache.outputs.cache-primary-key }}
 
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
