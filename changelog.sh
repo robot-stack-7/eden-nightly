@@ -112,11 +112,16 @@ echo "| MacOS | [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-MacOS-arm6
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-MacOS-x86_64.7z) |" >> "$CHANGELOG_FILE"
 echo "| [Source Code](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Source-Code.7z) | |" >> "$CHANGELOG_FILE"
 
+# Fetch all repo history and cpm pakages
+git fetch --all
+chmod a+x tools/cpm-fetch*.sh
+tools/cpm-fetch-all.sh
+
 # Pack up source for upload
 cd ..
 mkdir -p artifacts
 mkdir "$SOURCE_NAME"
-cp -a eden/. "$SOURCE_NAME"
+cp -a eden "$SOURCE_NAME"
 ZIP_NAME="$SOURCE_NAME.7z"
 7z a -t7z -mx=9 "$ZIP_NAME" "$SOURCE_NAME"
 mv "$ZIP_NAME" artifacts/
