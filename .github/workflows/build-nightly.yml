@@ -111,15 +111,9 @@ jobs:
           chmod +x ./linux-dependencies.sh
           ./linux-dependencies.sh
 
-      - name: Pull Eden with submodules
+      - name: Clone Eden
         run: |
-          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-          fi
-          cd ./eden
-          git submodule update --init --recursive
+          git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
       - name: Restore cpm cache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
@@ -182,15 +176,9 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Pull Eden with submodules
+      - name: Clone Eden
         run: |
-          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-          fi
-          cd ./eden
-          git submodule update --init --recursive
+          git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
       - name: Restore cpm cache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
@@ -297,16 +285,11 @@ jobs:
         run: |
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
           
-      - name: Pull Eden with submodules
+      - name: Clone Eden
         shell: bash
         run: |
-          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-          fi
+          git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
           cd ./eden
-          git submodule update --init --recursive
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
 
       - name: Restore cpm cache
@@ -365,7 +348,7 @@ jobs:
           - target: x86_64
             runs-on: macos-13
           - target: arm64
-            runs-on: macos-14
+            runs-on: macos-latest
     continue-on-error: true
     env:
       TARGET: ${{ matrix.target }}
@@ -375,15 +358,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Pull Eden with submodules
+      - name: Clone Eden
         run: |
-          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-          fi
-          cd ./eden
-          git submodule update --init --recursive
+          git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
       - name: Restore cpm cache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
@@ -406,8 +383,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew uninstall --ignore-dependencies cmake || true
-          brew install --formula --quiet autoconf automake boost ccache cmake glslang hidapi libiconv libtool nasm qt@6 speexdsp vulkan-loader
+          brew install --formula --quiet autoconf automake boost ccache glslang hidapi libiconv libtool nasm speexdsp vulkan-loader vulkan-headers vulkan-utility-libraries
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.7.3
+          cache: 'true'
 
       - name: Compile Eden MacOS (${{ matrix.target }})
         run: |
@@ -450,15 +432,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5.0.0
         
-      - name: Pull Eden with submodules
+      - name: Clone Eden
         run: |
-          if ! git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden; then
-            echo "Using mirror instead..."
-            rm -rf ./eden || true
-            git clone 'https://github.com/pflyly/eden-mirror.git' ./eden
-          fi
-          cd ./eden
-          git submodule update --init --recursive
+          git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
       - name: Restore cpm cache
         uses: actions/cache/restore@v4
