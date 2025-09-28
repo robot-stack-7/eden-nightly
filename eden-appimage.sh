@@ -179,6 +179,7 @@ chmod +x ./pelf
 
 APPBUNDLE="Eden-${COUNT}-${TARGET}-${ARCH}.dwfs.AppBundle"
 ln -sfv ./AppDir/eden.svg ./AppDir/.DirIcon.svg
+cp -v ../io.github.eden_emu.Eden.appdata.xml ./AppDir
 ./pelf --add-appdir ./AppDir --appbundle-id="Eden-${DATE}-Escary" --compression "-C zstd:level=22 -S26 -B6" --output-to "$APPBUNDLE"
 
 mkdir -p appbundle
