@@ -165,16 +165,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install sccache glslang-tools libvulkan-dev -y
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: 17
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+          sudo apt-get update -y
+          sudo apt-get install sccache glslang-tools libvulkan-dev python3-requests -y
 
       - name: Clone Eden
         run: |
