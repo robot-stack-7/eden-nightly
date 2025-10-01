@@ -1,0 +1,42 @@
+diff --git a/src/android/app/build.gradle.kts b/src/android/app/build.gradle.kts
+index e8d8141711..4975087d89 100644
+--- a/src/android/app/build.gradle.kts
++++ b/src/android/app/build.gradle.kts
+@@ -178,7 +178,9 @@ android {
+                     "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+                     "-DBUILD_TESTING=OFF",
+                     "-DYUZU_TESTS=OFF",
+-                    "-DDYNARMIC_TESTS=OFF"
++                    "-DDYNARMIC_TESTS=OFF",
++                    "-DCMAKE_C_FLAGS=-fprofile-instr-generate=/sdcard/Android/data/dev.eden.eden_emulator/files/eden_%m.profraw",
++                    "-DCMAKE_CXX_FLAGS=-fprofile-instr-generate=/sdcard/Android/data/dev.eden.eden_emulator/files/eden_%m.profraw"
+                 )
+ 
+                 abiFilters("arm64-v8a")
+diff --git a/src/android/app/src/main/jni/native.cpp b/src/android/app/src/main/jni/native.cpp
+index 306b7e2a4c..db7bc47e60 100644
+--- a/src/android/app/src/main/jni/native.cpp
++++ b/src/android/app/src/main/jni/native.cpp
+@@ -304,6 +304,8 @@ Core::SystemResultStatus EmulationSession::InitializeEmulation(const std::string
+     return Core::SystemResultStatus::Success;
+ }
+ 
++extern "C" int __llvm_profile_write_file(void);
++
+ void EmulationSession::ShutdownEmulation() {
+     std::scoped_lock lock(m_mutex);
+ 
+@@ -328,11 +330,13 @@ void EmulationSession::ShutdownEmulation() {
+         m_load_result = Core::SystemResultStatus::ErrorNotInitialized;
+         m_window.reset();
+         OnEmulationStopped(Core::SystemResultStatus::Success);
++        __llvm_profile_write_file();
+         return;
+     }
+ 
+     // Tear down the render window.
+     m_window.reset();
++    __llvm_profile_write_file();
+ }
+ 
+ void EmulationSession::PauseEmulation() {
