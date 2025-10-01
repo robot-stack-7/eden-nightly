@@ -15,6 +15,7 @@ on:
           - appimage
           - macos
           - android
+          - android_pgo_gen
           - freebsd
           - info
         default: 'all'
@@ -200,6 +201,39 @@ jobs:
           path: |
             ${{ github.workspace }}/eden/.cache
           key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
+
+  android_pgo_gen:
+    if: github.event.inputs.job_to_run == 'android_pgo_gen'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [pgogen]
+    continue-on-error: true
+    name: "Android (${{ matrix.target }})"
+    env:
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v5.0.0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install glslang-tools libvulkan-dev python3-requests -y
+
+      - name: Clone Eden
+        run: |
+          git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
+
+      - name: Compile Eden android
+        run: |
+          chmod +x ./eden-android.sh
+          ./eden-android.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: eden-android-${{ matrix.target }}
+          path: eden/src/android/artifacts/
 
   windows:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows'
