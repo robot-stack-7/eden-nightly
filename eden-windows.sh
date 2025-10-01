@@ -9,6 +9,9 @@ declare -a EXTRA_CMAKE_FLAGS=()
 # hook the updater to check my repo
 patch -p1 < ../patches/update.patch
 
+#tempfix, remove when upstream fixed
+# patch -p1 < ../patches/tempfix.patch
+
 if [[ "${TOOLCHAIN}" == "clang" ]]; then
     if [[ "${TARGET}" == "PGO" ]]; then
         EXTRA_CMAKE_FLAGS+=(

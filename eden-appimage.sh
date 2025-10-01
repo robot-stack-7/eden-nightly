@@ -121,6 +121,9 @@ DATE="$(date +"%d_%m_%Y")"
 # hook the updater to check my repo
 git apply ../patches/update.patch
 
+#tempfix, remove when upstream fixed
+# git apply ../patches/tempfix.patch
+
 mkdir build
 cd build
 cmake .. -GNinja \

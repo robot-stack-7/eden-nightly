@@ -1,8 +1,8 @@
 diff --git a/CMakeModules/GenerateSCMRev.cmake b/CMakeModules/GenerateSCMRev.cmake
-index 2d7081b7db..eb3794459b 100644
+index 1ae608c085..f45c556d77 100644
 --- a/CMakeModules/GenerateSCMRev.cmake
 +++ b/CMakeModules/GenerateSCMRev.cmake
-@@ -8,19 +8,19 @@
+@@ -8,19 +8,37 @@
  include(GetSCMRev)
  
  function(get_timestamp _var)
@@ -12,26 +12,6 @@ index 2d7081b7db..eb3794459b 100644
  endfunction()
  
  get_timestamp(BUILD_DATE)
-+git_count(GIT_COUNT)
- 
- if (DEFINED GIT_RELEASE)
-   set(BUILD_VERSION "${GIT_TAG}")
-   set(GIT_REFSPEC "${GIT_RELEASE}")
-   set(IS_DEV_BUILD false)
- else()
--  string(SUBSTRING ${GIT_COMMIT} 0 10 BUILD_VERSION)
--  set(BUILD_VERSION "${BUILD_VERSION}-${GIT_REFSPEC}")
-+  set(BUILD_VERSION "${BUILD_DATE}-${GIT_COUNT}")
-   set(IS_DEV_BUILD true)
- endif()
- 
-diff --git a/CMakeModules/GetSCMRev.cmake b/CMakeModules/GetSCMRev.cmake
-index ee5ce6a91c..b61b8a3531 100644
---- a/CMakeModules/GetSCMRev.cmake
-+++ b/CMakeModules/GetSCMRev.cmake
-@@ -8,6 +8,23 @@ function(trim var)
-   set(${var} ${new} PARENT_SCOPE)
- endfunction()
  
 +function(git_count _var)
 +    execute_process(
@@ -50,23 +30,41 @@ index ee5ce6a91c..b61b8a3531 100644
 +    set(${_var} "${out}" PARENT_SCOPE)
 +endfunction()
 +
- set(TAG_FILE ${CMAKE_SOURCE_DIR}/GIT-TAG)
- set(REF_FILE ${CMAKE_SOURCE_DIR}/GIT-REFSPEC)
- set(COMMIT_FILE ${CMAKE_SOURCE_DIR}/GIT-COMMIT)
++git_count(GIT_COUNT)
++
+ if (DEFINED GIT_RELEASE)
+   set(BUILD_VERSION "${GIT_TAG}")
+   set(GIT_REFSPEC "${GIT_RELEASE}")
+   set(IS_DEV_BUILD false)
+ else()
+-  string(SUBSTRING ${GIT_COMMIT} 0 10 BUILD_VERSION)
+-  set(BUILD_VERSION "${BUILD_VERSION}-${GIT_REFSPEC}")
++  set(BUILD_VERSION "${BUILD_DATE}-${GIT_COUNT}")
+   set(IS_DEV_BUILD true)
+ endif()
+ 
+@@ -28,7 +46,7 @@ set(GIT_DESC ${BUILD_VERSION})
+ 
+ # Generate cpp with Git revision from template
+ # Also if this is a CI build, add the build name (ie: Nightly, Canary) to the scm_rev file as well
+-set(REPO_NAME "Eden")
++set(REPO_NAME "Eden Nightly")
+ set(BUILD_ID ${GIT_REFSPEC})
+ set(BUILD_FULLNAME "${REPO_NAME} ${BUILD_VERSION} ")
+ set(CXX_COMPILER "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+@@ -36,6 +54,6 @@ set(CXX_COMPILER "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+ # Auto-updater metadata! Must somewhat mirror GitHub API endpoint
+ set(BUILD_AUTO_UPDATE_WEBSITE "https://github.com")
+ set(BUILD_AUTO_UPDATE_API "http://api.github.com")
+-set(BUILD_AUTO_UPDATE_REPO "eden-emulator/Releases")
++set(BUILD_AUTO_UPDATE_REPO "pflyly/eden-nightly")
+ 
+ configure_file(scm_rev.cpp.in scm_rev.cpp @ONLY)
 diff --git a/src/yuzu/about_dialog.cpp b/src/yuzu/about_dialog.cpp
-index b7c0cd58d5..9874093a90 100644
+index 9f7597f471..b73cd41c1e 100644
 --- a/src/yuzu/about_dialog.cpp
 +++ b/src/yuzu/about_dialog.cpp
-@@ -18,7 +18,7 @@ AboutDialog::AboutDialog(QWidget* parent)
-     static const std::string build_id = std::string{Common::g_build_id};
-     static const std::string compiler = std::string{Common::g_compiler_id};
- 
--    static const std::string yuzu_build = fmt::format("Eden | {} | {}", description, compiler);
-+    static const std::string yuzu_build = fmt::format("Eden Nightly | {} | {}", description, compiler);
- 
-     const auto override_build = fmt::format(fmt::runtime(
-                                                 std::string(Common::g_title_bar_format_idle)),
-@@ -33,7 +33,7 @@ AboutDialog::AboutDialog(QWidget* parent)
+@@ -34,7 +34,7 @@ AboutDialog::AboutDialog(QWidget* parent)
      }
      ui->labelBuildInfo->setText(
          ui->labelBuildInfo->text().arg(QString::fromStdString(yuzu_build_version),
@@ -75,43 +73,3 @@ index b7c0cd58d5..9874093a90 100644
  }
  
  AboutDialog::~AboutDialog() = default;
-diff --git a/src/yuzu/main.cpp b/src/yuzu/main.cpp
-index 19162a4ab7..f8628e1aa1 100644
---- a/src/yuzu/main.cpp
-+++ b/src/yuzu/main.cpp
-@@ -4193,11 +4193,11 @@ void GMainWindow::OnEmulatorUpdateAvailable() {
-     update_prompt.addButton(QMessageBox::Yes);
-     update_prompt.addButton(QMessageBox::Ignore);
-     update_prompt.setText(
--        tr("Update %1 for Eden is available.\nWould you like to download it?").arg(version_string));
-+        tr("Update %1 for Eden Nightly is available.\nWould you like to download it?").arg(version_string));
-     update_prompt.exec();
-     if (update_prompt.button(QMessageBox::Yes) == update_prompt.clickedButton()) {
-         QDesktopServices::openUrl(
--            QUrl(QString::fromStdString("https://github.com/eden-emulator/Releases/releases/tag/") +
-+            QUrl(QString::fromStdString("https://github.com/pflyly/eden-nightly/releases/tag/") +
-                  version_string));
-     }
- }
-@@ -4209,7 +4209,7 @@ void GMainWindow::UpdateWindowTitle(std::string_view title_name, std::string_vie
-     static const std::string build_id = std::string{Common::g_build_id};
-     static const std::string compiler = std::string{Common::g_compiler_id};
- 
--    static const std::string yuzu_title = fmt::format("Eden | {} | {}", description, compiler);
-+    static const std::string yuzu_title = fmt::format("Eden Nightly | {} | {}", description, compiler);
- 
-     const auto override_title =
-         fmt::format(fmt::runtime(std::string(Common::g_title_bar_format_idle)), build_id);
-diff --git a/src/yuzu/update_checker.cpp b/src/yuzu/update_checker.cpp
-index 8291987d73..b8eb4c1e1f 100644
---- a/src/yuzu/update_checker.cpp
-+++ b/src/yuzu/update_checker.cpp
-@@ -55,7 +55,7 @@ std::optional<std::string> UpdateChecker::GetResponse(std::string url, std::stri
- std::optional<std::string> UpdateChecker::GetLatestRelease(bool include_prereleases)
- {
-     constexpr auto update_check_url = "http://api.github.com";
--    std::string update_check_path = "/repos/eden-emulator/Releases";
-+    std::string update_check_path = "/repos/pflyly/eden-nightly";
-     try {
-         if (include_prereleases) { // This can return either a prerelease or a stable release,
-             // whichever is more recent.

@@ -332,15 +332,11 @@ jobs:
 
   macos:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'macos'
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: macos-latest
     name: "MacOS (${{ matrix.target }})"
     strategy:
       matrix:
-        include:
-          - target: x86_64
-            runs-on: macos-13
-          - target: arm64
-            runs-on: macos-latest
+        target: [arm64]
     continue-on-error: true
     env:
       TARGET: ${{ matrix.target }}

@@ -14,6 +14,9 @@ git apply ../patches/macos.patch
 # hook the updater to check my repo
 git apply ../patches/update.patch
 
+#tempfix, remove when upstream fixed
+# git apply ../patches/tempfix.patch
+
 COUNT="$(git rev-list --count HEAD)"
 APP_NAME="Eden-${COUNT}-MacOS-${TARGET}"
 
