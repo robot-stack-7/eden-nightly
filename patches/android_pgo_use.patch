@@ -1,16 +1,18 @@
 diff --git a/src/android/app/build.gradle.kts b/src/android/app/build.gradle.kts
-index e8d8141711..99b0365a5a 100644
+index e8d8141711..099125bff1 100644
 --- a/src/android/app/build.gradle.kts
 +++ b/src/android/app/build.gradle.kts
-@@ -178,7 +178,10 @@ android {
+@@ -178,7 +178,12 @@ android {
                      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
                      "-DBUILD_TESTING=OFF",
                      "-DYUZU_TESTS=OFF",
 -                    "-DDYNARMIC_TESTS=OFF"
 +                    "-DDYNARMIC_TESTS=OFF",
 +                    "-DCMAKE_BUILD_TYPE=Release",
-+                    "-DCMAKE_C_FLAGS=-fprofile-use=$projectDir/../../../../pgo/android.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date -Wno-backend-plugin",
-+                    "-DCMAKE_CXX_FLAGS=-fprofile-use=$projectDir/../../../../pgo/android.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date -Wno-backend-plugin",
++                    "-DCMAKE_C_FLAGS=-fprofile-use=$projectDir/../../../../pgo/android.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date -flto=thin",
++                    "-DCMAKE_CXX_FLAGS=-fprofile-use=$projectDir/../../../../pgo/android.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date -flto=thin",
++                    "-DCMAKE_SHARED_LINKER_FLAGS=-flto=thin",
++                    "-DCMAKE_EXE_LINKER_FLAGS=-flto=thin"
                  )
  
                  abiFilters("arm64-v8a")
