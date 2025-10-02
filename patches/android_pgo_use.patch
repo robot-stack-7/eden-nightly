@@ -1,5 +1,5 @@
 diff --git a/src/android/app/build.gradle.kts b/src/android/app/build.gradle.kts
-index e8d8141711..4b15489d01 100644
+index e8d8141711..664b9a6349 100644
 --- a/src/android/app/build.gradle.kts
 +++ b/src/android/app/build.gradle.kts
 @@ -178,7 +178,12 @@ android {
@@ -9,8 +9,8 @@ index e8d8141711..4b15489d01 100644
 -                    "-DDYNARMIC_TESTS=OFF"
 +                    "-DDYNARMIC_TESTS=OFF",
 +                    "-DCMAKE_BUILD_TYPE=Release",
-+                    "-DCMAKE_C_FLAGS=-fprofile-use=$projectDir/../../../pgo/android.profdata -Wno-profile-unprofiled -Wno-profile-out-of-date -flto=thin -v",
-+                    "-DCMAKE_CXX_FLAGS=-fprofile-use=$projectDir/../../../pgo/android.profdata -Wno-profile-unprofiled -Wno-profile-out-of-date -flto=thin -v",
++                    "-DCMAKE_C_FLAGS=-fprofile-use=$projectDir/../../../../pgo/android.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date -flto=thin -v",
++                    "-DCMAKE_CXX_FLAGS=-fprofile-use=$projectDir/../../../../pgo/android.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date -flto=thin -v",
 +                    "-DCMAKE_SHARED_LINKER_FLAGS=-flto=thin -v",
 +                    "-DCMAKE_EXE_LINKER_FLAGS=-flto=thin -v"
                  )
