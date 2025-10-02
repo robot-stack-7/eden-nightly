@@ -157,10 +157,12 @@ jobs:
     strategy:
       matrix:
         target: [Replace, Coexist, Optimised]
+        optimize: [normal, PGO]
     continue-on-error: true
-    name: "Android (${{ matrix.target }})"
+    name: "Android ${{ matrix.target }} (${{ matrix.optimize }})"
     env:
       TARGET: ${{ matrix.target }}
+      OPTIMIZE: ${{ matrix.optimize }}
     steps:
       - uses: actions/checkout@v5.0.0
 
@@ -173,15 +175,15 @@ jobs:
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
-      - name: Restore cpm cache for ${{ matrix.target }}
+      - name: Restore cpm cache
         uses: actions/cache/restore@v4
         id: restore-cpm-cache
         with:
           path: |
             ${{ github.workspace }}/eden/.cache
-          key: ${{ runner.os }}-android-cpm-${{ matrix.target }}-${{ github.sha }}
+          key: ${{ runner.os }}-android-cpm-${{ matrix.target }}-${{ matrix.optimize }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-android-cpm-${{ matrix.target }}-
+            ${{ runner.os }}-android-cpm-${{ matrix.target }}-${{ matrix.optimize }}-
 
       - name: Compile Eden android
         run: |
@@ -191,7 +193,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: eden-android-${{ matrix.target }}
+          name: eden-android-${{ matrix.target }}-${{ matrix.optimize }}
           path: eden/src/android/artifacts/
 
       - name: Save cpm cache for ${{ matrix.target }}
