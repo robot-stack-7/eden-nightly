@@ -81,7 +81,10 @@ echo "| Linux (AppBundle) | [\`Common x86_64_v3\`](${BASE_DOWNLOAD_URL}/${TAG}/E
 echo "| FreeBSD | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-amd64.tar.xz) | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-PGO-amd64.tar.xz) | " >> "$CHANGELOG_FILE"
 echo "| Android | [\`Replace\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Replace.apk)<br><br>\
 [\`Coexist\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Coexist.apk)<br><br>\
-[\`Optimised\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised.apk) |" >> "$CHANGELOG_FILE"
+[\`Optimised\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised.apk) | \
+[\`Replace-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Replace-PGO.apk)<br><br>\
+[\`Coexist-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Coexist-PGO.apk)<br><br>\
+[\`Optimised-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised-PGO.apk) |" >> "$CHANGELOG_FILE"
 echo "| Windows (MSVC) | **7z**<br>────────────────<br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-x86_64.7z)<br><br>\
 [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-arm64.7z)<br><br>\
