@@ -1,5 +1,5 @@
 diff --git a/src/android/app/build.gradle.kts b/src/android/app/build.gradle.kts
-index e8d8141711..9453364972 100644
+index e8d8141711..11a2c85b02 100644
 --- a/src/android/app/build.gradle.kts
 +++ b/src/android/app/build.gradle.kts
 @@ -178,7 +178,10 @@ android {
@@ -9,8 +9,8 @@ index e8d8141711..9453364972 100644
 -                    "-DDYNARMIC_TESTS=OFF"
 +                    "-DDYNARMIC_TESTS=OFF",
 +                    "-DCMAKE_BUILD_TYPE=Release",
-+                    "-DCMAKE_C_FLAGS=-fprofile-instr-generate=/sdcard/Android/data/dev.eden.eden_emulator/files/eden-%p.profraw",
-+                    "-DCMAKE_CXX_FLAGS=-fprofile-instr-generate=/sdcard/Android/data/dev.eden.eden_emulator/files/eden-%p.profraw"
++                    "-DCMAKE_C_FLAGS=-fprofile-generate=/sdcard/Android/data/dev.eden.eden_emulator/files/eden-%p.profraw",
++                    "-DCMAKE_CXX_FLAGS=-fprofile-generate=/sdcard/Android/data/dev.eden.eden_emulator/files/eden-%p.profraw"
                  )
  
                  abiFilters("arm64-v8a")
