@@ -10,7 +10,6 @@ fi
 if [ "$OPTIMIZE" = "PGO" ]; then
 	# pacth to use prfodata
 	git apply ../patches/android_pgo_use.patch
-	unzip ../pgo/android.profdata.zip -d ../pgo
 fi
 
 if [ "$TARGET" = "Coexist" ]; then
