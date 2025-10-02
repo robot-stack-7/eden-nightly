@@ -35,9 +35,9 @@ fi
 cd src/android
 chmod +x ./gradlew
 if [ "$TARGET" = "Optimised" ]; then
-	./gradlew assembleGenshinSpoofRelease
+	./gradlew assembleGenshinSpoofRelease --info
 else
-	./gradlew assembleMainlineRelease
+	./gradlew assembleMainlineRelease --info
 fi
 
 APK_PATH=$(find app/build/outputs/apk -type f -name "*.apk" | head -n 1)
