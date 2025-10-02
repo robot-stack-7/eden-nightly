@@ -1,13 +1,14 @@
 diff --git a/src/android/app/build.gradle.kts b/src/android/app/build.gradle.kts
-index e8d8141711..d5042c7b11 100644
+index e8d8141711..13db4428dc 100644
 --- a/src/android/app/build.gradle.kts
 +++ b/src/android/app/build.gradle.kts
-@@ -178,7 +178,11 @@ android {
+@@ -178,7 +178,12 @@ android {
                      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
                      "-DBUILD_TESTING=OFF",
                      "-DYUZU_TESTS=OFF",
 -                    "-DDYNARMIC_TESTS=OFF"
 +                    "-DDYNARMIC_TESTS=OFF",
++                    "-DCMAKE_BUILD_TYPE=Release",
 +                    "-DCMAKE_C_FLAGS_RELEASE=-fprofile-instr-use=$projectDir/../../../../pgo/android.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date -flto=thin",
 +                    "-DCMAKE_CXX_FLAGS_RELEASE=-fprofile-instr-use=$projectDir/../../../../pgo/android.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date -flto=thin",
 +                    "-DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-flto=thin",
