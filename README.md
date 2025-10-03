@@ -16,7 +16,7 @@ This repository provides **unofficial nightly releases** of **Eden** for the fol
 - **Android**
 - **Windows-MSVC** (`x86_64`, `arm64`)
 - **Windows-CLANG** (`x86_64`, `arm64`)
-- **MacOS** (`x86_64`, `arm64`)
+- **MacOS** (`arm64`)
 - **FreeBSD** (`amd64`)
 
 >[!WARNING]
@@ -37,7 +37,7 @@ PGO builds can improve runtime performance by **5–10% FPS** compared to non-PG
   <img src="https://github.com/pflyly/eden-nightly/blob/main/pgo/TOTK4.jpg" width="400">
 </p>
 
-For now, PGO builds are **experimental** and provided alongside regular builds.  
+For now, PGO builds are provided alongside regular builds.  
 Once stabilized and confirmed, **only PGO optimized builds will be released whenever possible**.
 
 ---------------------------------------------------------------
@@ -74,7 +74,7 @@ Shares the same application ID as the official Eden release. Installing this ver
 
 - **Coexist** Build
   
-Uses a nightly application ID, allowing it to coexist with the official Eden release. It appears as "**Eden Nightly**" on the home screen, and "**Eden Nightly**" on the main screen of eden.
+Uses a nightly application ID, allowing it to coexist with the official Eden release. It appears as "**Eden Nightly**" on the home screen.
 
 - **Optimised** Build
   
@@ -84,23 +84,6 @@ Using com.miHoYo.Yuanshen for application ID to enable device dependent features
 
 ### 🍎 MacOS Builds
 
-> ⚠️ MacOS builds are **not officially supported** at the moment and are provided for **testing purposes only**.
+> ⚠️ MacOS builds are provided for **testing purposes only**.
 >   
 > Functionality may be limited and issues are expected. If you encounter any problems, you're welcome to open an issue.
-
----------------------------------------------------------------
-
-
-* [**Latest Nightly Release Here**](https://github.com/pflyly/eden-nightly/releases/latest)
-
-
----------------------------------------------------------------
-This repo is ported from my [citron-nightly repo](https://github.com/pflyly/Citron-Nightly), which is a fork based on the work of **@Samueru-sama**.
-
-It is possible that this appimage may fail to work with appimagelauncher, I recommend these alternatives instead: 
-
-* [AM](https://github.com/ivan-hc/AM) `am -i eden-nightly` or `appman -i eden-nightly`
-
-* [dbin](https://github.com/xplshn/dbin) `dbin install eden-nightly.appimage`
-
-This appimage works without fuse2 as it can use fuse3 instead, it can also work without fuse at all thanks to the [uruntime](https://github.com/VHSgunzo/uruntime)
