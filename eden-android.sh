@@ -14,7 +14,7 @@ fi
 
 if [ "$TARGET" = "Coexist" ]; then
     # Change the App name and application ID to make it coexist with official build
-    sed -i 's/applicationId = "dev\.eden\.eden_emulator"/applicationId = "dev.eden_nightly.eden_emulator"/' src/android/app/build.gradle.kts
+    sed -i 's/applicationId = "dev\.eden\.eden_emulator"/applicationId = "dev.eden.eden_nightly"/' src/android/app/build.gradle.kts
     sed -i 's/resValue("string", "app_name_suffixed", "Eden")/resValue("string", "app_name_suffixed", "Eden Nightly")/' src/android/app/build.gradle.kts
 fi        
 
