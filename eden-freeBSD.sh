@@ -35,6 +35,7 @@ cd build
 cmake .. -GNinja \
     -DYUZU_TESTS=OFF \
     -DYUZU_USE_BUNDLED_QT=OFF \
+    -DYUZU_USE_BUNDLED_SIRIT=ON \
     -DYUZU_ENABLE_LTO=ON \
     -DYUZU_USE_CPM=ON \
     -DYUZU_USE_FASTER_LD=OFF \
