@@ -12,7 +12,7 @@ if [ "$OPTIMIZE" = "PGO" ]; then
 	git apply ../patches/android_pgo_use.patch
 
 	# merge profraw files with the same version ndk to avoid mismatch
-	7z x ../pgo/android.zip -d ../pgo
+	7z x ../pgo/android.zip -o../pgo
 	/usr/local/lib/android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-profdata \
     merge -o ../pgo/android.profdata ../pgo/eden-*.profraw/*
 fi
