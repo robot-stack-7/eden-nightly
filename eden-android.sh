@@ -10,6 +10,10 @@ fi
 if [ "$OPTIMIZE" = "PGO" ]; then
 	# pacth to use prfodata
 	git apply ../patches/android_pgo_use.patch
+
+	# merge profraw files with the same version ndk to avoid mismatch
+	/usr/local/lib/android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-profdata \
+    merge -o ../pgo/android.profdata ../pgo/*.profraw
 fi
 
 if [ "$TARGET" = "Coexist" ]; then
