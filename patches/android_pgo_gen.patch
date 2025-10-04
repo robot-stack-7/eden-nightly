@@ -43,3 +43,16 @@ index 306b7e2a4c..db7bc47e60 100644
  }
  
  void EmulationSession::PauseEmulation() {
+diff --git a/src/core/CMakeLists.txt b/src/core/CMakeLists.txt
+index 62dab070e3..497cc80482 100644
+--- a/src/core/CMakeLists.txt
++++ b/src/core/CMakeLists.txt
+@@ -1184,7 +1184,7 @@ else()
+         -Wno-cast-function-type
+ 
+         $<$<CXX_COMPILER_ID:Clang>:-fsized-deallocation>
+-        $<$<CXX_COMPILER_ID:Clang>:-Wno-cast-function-type-mismatch>
++        $<$<CXX_COMPILER_ID:Clang>:-Wno-cast-function-type-strict>
+     )
+ endif()
+ 
