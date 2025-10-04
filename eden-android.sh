@@ -23,11 +23,6 @@ if [ "$TARGET" = "Coexist" ]; then
     sed -i 's/resValue("string", "app_name_suffixed", "Eden")/resValue("string", "app_name_suffixed", "Eden Nightly")/' src/android/app/build.gradle.kts
 fi        
 
-if [ "$TARGET" = "Optimised" ]; then
-    # Add optimised to the App name
-    sed -i 's/resValue("string", "app_name_suffixed", "Eden")/resValue("string", "app_name_suffixed", "Eden Optimised")/' src/android/app/build.gradle.kts
-fi 
-
 COUNT="$(git rev-list --count HEAD)"
 
 if [ "$OPTIMIZE" = "PGO" ]; then
