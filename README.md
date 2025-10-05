@@ -37,8 +37,8 @@ PGO builds can improve runtime performance by **5–10% FPS** compared to non-PG
   <img src="https://github.com/pflyly/eden-nightly/blob/main/pgo/TOTK4.jpg" width="400">
 </p>
 
-For now, PGO builds are provided alongside regular builds.  
-Once stabilized and confirmed, **only PGO optimized builds will be released whenever possible**.
+For now, PGO builds are provided alongside regular builds. 
+They are extremely experimental with unstable performance boost across different builds even with the same game. 
 
 ---------------------------------------------------------------
 ### 🐧 Linux Builds
