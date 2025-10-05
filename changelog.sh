@@ -37,7 +37,7 @@ echo >> "$CHANGELOG_FILE"
 echo "> [!IMPORTANT]" >> "$CHANGELOG_FILE"
 echo "> See the **[Release Overview](https://github.com/pflyly/eden-nightly?tab=readme-ov-file#release-overview)** section for detailed differences between builds." >> "$CHANGELOG_FILE"
 echo ">" >> "$CHANGELOG_FILE"
-echo  -e "> **PGO-optimized** builds are now available, offering up to **5–10%** higher FPS. Test them out!\n>**Soon, we’ll release only PGO builds whenever possible.**" >> "$CHANGELOG_FILE"
+echo  -e "> **PGO-optimized** builds are now available, can offer up to **5–10%** higher FPS in theory depending on games.\n>**But note that they are now extremely experimental with unstable performance boost across different builds even with the same game.**" >> "$CHANGELOG_FILE"
 echo >> "$CHANGELOG_FILE"
 
 # Add changelog section

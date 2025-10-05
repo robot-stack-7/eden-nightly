@@ -17,8 +17,8 @@ if [[ "${TOOLCHAIN}" == "clang" ]]; then
         EXTRA_CMAKE_FLAGS+=(
             "-DCMAKE_C_COMPILER=clang-cl"
             "-DCMAKE_CXX_COMPILER=clang-cl"
-            "-DCMAKE_CXX_FLAGS=-O3 -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
-            "-DCMAKE_C_FLAGS=-O3 -fprofile-instr-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
+            "-DCMAKE_CXX_FLAGS=-O3 -fprofile-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
+            "-DCMAKE_C_FLAGS=-O3 -fprofile-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
         )
     else
         EXTRA_CMAKE_FLAGS+=(
