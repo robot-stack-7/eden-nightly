@@ -78,20 +78,22 @@ echo "| Linux (AppBundle) | [\`Common x86_64_v3\`](${BASE_DOWNLOAD_URL}/${TAG}/E
 [\`Steamdeck-PGO x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Steamdeck-PGO-x86_64.dwfs.AppBundle)<br><br>\
 [\`ROG-ALLY-PGO x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-ROG_ALLY-PGO-x86_64.dwfs.AppBundle)<br><br>\
 [\`aarch64-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Linux-PGO-aarch64.dwfs.AppBundle)" >> "$CHANGELOG_FILE"
-echo "| FreeBSD | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-amd64.tar.xz) | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-PGO-amd64.tar.xz) | " >> "$CHANGELOG_FILE"
+echo "| FreeBSD | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-amd64.tar.xz) | [\`amd64-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-PGO-amd64.tar.xz) | " >> "$CHANGELOG_FILE"
 echo "| Android | [\`Replace\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Replace.apk)<br><br>\
 [\`Coexist\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Coexist.apk)<br><br>\
-[\`Optimised\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised.apk) | \
+[\`Optimised\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised.apk)<br><br>\
+[\`Legacy\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Legacy.apk) | \
 [\`Replace-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Replace-PGO.apk)<br><br>\
 [\`Coexist-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Coexist-PGO.apk)<br><br>\
-[\`Optimised-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised-PGO.apk) |" >> "$CHANGELOG_FILE"
+[\`Optimised-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Optimised-PGO.apk)<br><br>\
+[\`Legacy-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Android-Legacy-PGO.apk) |" >> "$CHANGELOG_FILE"
 echo "| Windows (MSVC) | **7z**<br>────────────────<br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-x86_64.7z)<br><br>\
 [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-arm64.7z)<br><br>\
 **Installer**<br>────────────────<br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-x86_64-Installer.exe)<br><br>\
 [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msvc-arm64-Installer.exe) |" >> "$CHANGELOG_FILE"
-echo "| Windows (CLANG)<br>**Experimental**<br> | **7z**<br>────────────────<br>\
+echo "| Windows (CLANG) | **7z**<br>────────────────<br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-x86_64.7z)<br><br>\
 [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-arm64.7z)<br><br>\
 **Installer**<br>────────────────<br>\
@@ -104,11 +106,11 @@ echo "| Windows (CLANG)<br>**Experimental**<br> | **7z**<br>──────�
 [\`x86_64-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-PGO-clang-x86_64-Installer.exe)<br><br>\
 [\`arm64-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-PGO-clang-arm64-Installer.exe) |" >> "$CHANGELOG_FILE"
 echo "| MacOS | [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-MacOS-arm64.7z) |" >> "$CHANGELOG_FILE"
-echo "| [Source Code](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Source-Code.7z) | |" >> "$CHANGELOG_FILE"
+echo "| Source Code | [Source](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Source-Code.7z) | |" >> "$CHANGELOG_FILE"
 
 # Fetch all repo history and cpm pakages
 git fetch --all
-chmod a+x tools/cpm-fetch*.sh
+chmod a+x tools/cpm-fetch-all.sh
 tools/cpm-fetch-all.sh
 
 # Pack up source for upload

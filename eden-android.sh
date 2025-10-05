@@ -33,8 +33,10 @@ fi
 
 cd src/android
 chmod +x ./gradlew
-if [ "$TARGET" = "Optimised" ]; then
+if [ "$TARGET" = "Optimized" ]; then
 	./gradlew assembleGenshinSpoofRelease
+elif [ "$TARGET" = "Legacy" ]; then
+	./gradlew assembleLegacyRelease
 else
 	./gradlew assembleMainlineRelease
 fi

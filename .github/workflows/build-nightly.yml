@@ -116,16 +116,6 @@ jobs:
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
-      - name: Restore cpm cache for ${{ matrix.target }}
-        uses: actions/cache/restore@v4
-        id: restore-cpm-cache
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-cpm-${{ matrix.target }}-
-
       - name: Compile Eden ${{ matrix.target }}
         run: |
           chmod +x ./eden-appimage.sh
@@ -143,20 +133,12 @@ jobs:
           name: eden-${{ matrix.target}}-appbundle
           path: eden/appbundle
 
-      - name: Save cpm cache for ${{ matrix.target }}
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
-
   android:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'android'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [Replace, Coexist, Optimised]
+        target: [Replace, Coexist, Optimized, Legacy]
         optimize: [normal, PGO]
     continue-on-error: true
     name: "Android ${{ matrix.target }} (${{ matrix.optimize }})"
@@ -175,16 +157,6 @@ jobs:
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
-      - name: Restore cpm cache
-        uses: actions/cache/restore@v4
-        id: restore-cpm-cache
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ runner.os }}-android-cpm-${{ matrix.target }}-${{ matrix.optimize }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-android-cpm-${{ matrix.target }}-${{ matrix.optimize }}-
-
       - name: Compile Eden android
         run: |
           chmod +x ./eden-android.sh
@@ -194,47 +166,6 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: eden-android-${{ matrix.target }}-${{ matrix.optimize }}
-          path: eden/src/android/artifacts/
-
-      - name: Save cpm cache for ${{ matrix.target }}
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
-
-  android_pgo_gen:
-    if: github.event.inputs.job_to_run == 'android_pgo_gen'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target: [pgogen]
-    continue-on-error: true
-    name: "Android (${{ matrix.target }})"
-    env:
-      TARGET: ${{ matrix.target }}
-    steps:
-      - uses: actions/checkout@v5.0.0
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install glslang-tools libvulkan-dev python3-requests -y
-
-      - name: Clone Eden
-        run: |
-          git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
-
-      - name: Compile Eden android
-        run: |
-          chmod +x ./eden-android.sh
-          ./eden-android.sh
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: eden-android-${{ matrix.target }}
           path: eden/src/android/artifacts/
 
   windows:
@@ -304,16 +235,6 @@ jobs:
           cd ./eden
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
 
-      - name: Restore cpm cache
-        uses: actions/cache/restore@v4
-        id: restore-cpm-cache
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-cpm-${{ matrix.target }}-${{ matrix.toolchain }}-${{ matrix.arch }}-
-
       - name: Compile Eden Windows
         shell: bash
         run: |
@@ -342,14 +263,6 @@ jobs:
           name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-installer-${{ matrix.arch }}
           path: installer/artifacts/
 
-      - name: Save cpm cache
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
-
   macos:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'macos'
     runs-on: macos-latest
@@ -369,16 +282,6 @@ jobs:
       - name: Clone Eden
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
-
-      - name: Restore cpm cache for ${{ matrix.target }}
-        uses: actions/cache/restore@v4
-        id: restore-cpm-cache
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ runner.os }}-cpm-${{ matrix.target }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-cpm-${{ matrix.target }}-
 
       - name: Restore ccache for ${{ matrix.target }}
         uses: actions/cache/restore@v4
@@ -410,14 +313,6 @@ jobs:
           name: eden-macos-${{ matrix.target }}
           path: eden/build/artifacts/
 
-      - name: Save cpm cache for ${{ matrix.target }}
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
-
       - name: Save ccache for ${{ matrix.target }}
         if: ${{ github.ref_name == 'main' }}
         uses: actions/cache/save@v4
@@ -444,15 +339,6 @@ jobs:
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
-      - name: Restore cpm cache
-        uses: actions/cache/restore@v4
-        id: restore-cpm-cache
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ matrix.target }}-cpm-${{ github.sha }}
-          restore-keys: ${{ matrix.target }}-cpm-
-
       - name: Compile Eden FreeBSD
         uses: vmactions/freebsd-vm@v1.2.4
         with:
@@ -468,14 +354,6 @@ jobs:
         with:
           name: eden-${{ matrix.target }}
           path: eden/build/artifacts/
-
-      - name: Save cpm cache
-        if: ${{ github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ${{ github.workspace }}/eden/.cache
-          key: ${{ steps.restore-cpm-cache.outputs.cache-primary-key }}
 
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
