@@ -49,7 +49,10 @@ ccache -s -v
 
 # Bundle and code-sign eden.app.
 APP=./bin/eden.app
+
 macdeployqt "$APP"
+macdeployqt "$APP" -always-overwrite
+
 codesign --deep --force --verify --verbose --sign - "$APP"
 
 # Pack for upload
