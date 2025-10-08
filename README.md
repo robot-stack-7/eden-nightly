@@ -57,13 +57,6 @@ A newly added **AppBundle** version, built with [**pelf**](https://github.com/xp
 
 ---------------------------------------------------------------
 
-### FreeBSD Builds
-> ⚠️ FreeBSD builds are provided as-is for **testing purposes only**.
->   
-> Functionality may be limited and issues are expected. If you encounter any problems, you're welcome to open an issue.
-> 
----------------------------------------------------------------
-
 ### 🤖 Android Builds
 
 Eden nightly for Android is available in four versions:
@@ -83,11 +76,3 @@ Using com.miHoYo.Yuanshen for application ID to enable device dependent features
 - **Legacy** Build
   
 Apply patches that improve compatibility with older GPUs (e.g. Snapdragon 865) at the cost of performance. It appears as "**Eden Legacy**" on the home screen.
-
----------------------------------------------------------------
-
-### 🍎 MacOS Builds
-
-> ⚠️ MacOS builds are provided for **testing purposes only**.
->   
-> Functionality may be limited and issues are expected. If you encounter any problems, you're welcome to open an issue.
