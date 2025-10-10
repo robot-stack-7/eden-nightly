@@ -14,12 +14,13 @@ APK_NAME="Eden-${COUNT}-Android-${TARGET}"
 cd src/android
 chmod +x ./gradlew
 if [ "$TARGET" = "Optimized" ]; then
-	./gradlew assembleGenshinSpoofRelease
+	./gradlew assembleGenshinSpoofRelease -PYUZU_ANDROID_ARGS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 elif [ "$TARGET" = "Legacy" ]; then
-	./gradlew assembleLegacyRelease
+	./gradlew assembleLegacyRelease -PYUZU_ANDROID_ARGS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 else
-	./gradlew assembleMainlineRelease
+	./gradlew assembleMainlineRelease -PYUZU_ANDROID_ARGS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 fi
+ccache -s -v
 
 APK_PATH=$(find app/build/outputs/apk -type f -name "*.apk" | head -n 1)
 mkdir -p artifacts

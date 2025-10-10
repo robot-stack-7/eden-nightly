@@ -26,12 +26,16 @@ if [[ "${TOOLCHAIN}" == "clang" ]]; then
             "-DCMAKE_CXX_COMPILER=clang-cl"
             "-DCMAKE_CXX_FLAGS=-O3"
             "-DCMAKE_C_FLAGS=-O3"
+            "-DCMAKE_C_COMPILER_LAUNCHER=ccache"
+            "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
         )
     fi
 else
     EXTRA_CMAKE_FLAGS+=(
     "-DYUZU_ENABLE_LTO=ON"
     "-DDYNARMIC_ENABLE_LTO=ON"
+    "-DCMAKE_C_COMPILER_LAUNCHER=ccache"
+    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
     )
 fi
 
@@ -62,6 +66,10 @@ cmake .. -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     "${EXTRA_CMAKE_FLAGS[@]}"
 ninja
+
+if [[ "${TARGET}" == "normal" ]]; then
+    ccache -s -v
+fi
 
 # Gather dependencies
 windeployqt --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir bin ./bin/eden.exe

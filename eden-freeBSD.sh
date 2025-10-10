@@ -27,6 +27,8 @@ else
     EXTRA_CMAKE_FLAGS+=(
     "-DCMAKE_CXX_FLAGS=-O3 -pipe -fuse-ld=lld -w"
     "-DCMAKE_C_FLAGS=-O3 -pipe -fuse-ld=lld -w"
+    "-DCMAKE_C_COMPILER_LAUNCHER=ccache"
+    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
     )
 fi
 
@@ -49,6 +51,8 @@ cmake .. -GNinja \
     -DQt6_DIR=/usr/local/lib/cmake/Qt6 \
     "${EXTRA_CMAKE_FLAGS[@]}"
 ninja
+
+ccache -s
 
 PKG_NAME="Eden-${COUNT}-${TARGET}-${ARCH}"
 PKG_DIR="${PKG_NAME}/usr/local"

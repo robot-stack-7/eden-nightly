@@ -19,6 +19,7 @@ case "$1" in
  		PROFILE="steamdeck"
    		EXTERNAL_SDL2="ON"
         TARGET="Steamdeck"
+		CCACHE="ccache"
 		CC="gcc"
 		CXX="g++"
         ;;
@@ -39,6 +40,7 @@ case "$1" in
  		PROFILE="steamdeck"
    		EXTERNAL_SDL2="ON"
         TARGET="ROG_ALLY"
+		CCACHE="ccache"
 		CC="gcc"
 		CXX="g++"
         ;;
@@ -57,6 +59,7 @@ case "$1" in
         CMAKE_CXX_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=mold -w"
         CMAKE_C_FLAGS="-march=x86-64-v3 -O3 -pipe -flto=auto -fuse-ld=mold -w"
         TARGET="Common"
+		CCACHE="ccache"
 		CC="gcc"
 		CXX="g++"
 		BUNDLED_SDL2="ON"
@@ -77,6 +80,7 @@ case "$1" in
         CMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fuse-ld=mold -w"
         CMAKE_C_FLAGS="-march=x86-64 -mtune=generic -O2 -pipe -flto=auto -fuse-ld=mold -w"
         TARGET="Legacy"
+		CCACHE="ccache"
 		CC="gcc"
 		CXX="g++"
 		BUNDLED_SDL2="ON"
@@ -97,6 +101,7 @@ case "$1" in
         CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fuse-ld=mold -w"
         CMAKE_C_FLAGS="-march=armv8-a -mtune=generic -O3 -pipe -flto=auto -fuse-ld=mold -w"
         TARGET="Linux"
+		CCACHE="ccache"
 		CC="gcc"
 		CXX="g++"
 		BUNDLED_SDL2="ON"
@@ -144,6 +149,8 @@ cmake .. -GNinja \
     -DYUZU_ROOM_STANDALONE=OFF \
     -DCMAKE_SYSTEM_PROCESSOR="$(uname -m)" \
     -DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_C_COMPILER_LAUNCHER="${CCACHE:-}" \
+	-DCMAKE_CXX_COMPILER_LAUNCHER="${CCACHE:-}" \
 	-DCMAKE_C_COMPILER="${CC:-}" \
  	-DCMAKE_CXX_COMPILER="${CXX:-}" \
     -DCMAKE_EXE_LINKER_FLAGS="-Wl,--as-needed" \
@@ -153,6 +160,7 @@ cmake .. -GNinja \
     ${CMAKE_CXX_FLAGS:+-DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS"} \
     ${CMAKE_C_FLAGS:+-DCMAKE_C_FLAGS="$CMAKE_C_FLAGS"}
 ninja
+ccache -s -v
 
 # Use sharun to generate AppDir
 cd ..

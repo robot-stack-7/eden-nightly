@@ -9,9 +9,9 @@ echo "---------------------------------------------------------------"
 pacman -Syu --noconfirm \
 	base-devel \
 	catch2 \
+	ccache \
 	cmake \
  	clang \
-	ffnvcodec-headers \
 	gamemode \
 	git \
 	glslang \
@@ -47,6 +47,10 @@ pacman -Syu --noconfirm \
 	xorg-server-xvfb \
 	zip \
 	zsync
+
+if [ "$(uname -m)" = 'x86_64' ]; then
+		pacman -Syu --noconfirm haskell-gnutls svt-av1
+fi
 
 wget --retry-connrefused --tries=30 "$EXTRA_PACKAGES" -O ./get-debloated-pkgs.sh
 chmod +x ./get-debloated-pkgs.sh

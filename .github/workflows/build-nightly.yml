@@ -80,27 +80,41 @@ jobs:
         include:
           - target: steamdeck
             runs-on: ubuntu-latest
+            ccache: 'true'
           - target: rog
             runs-on: ubuntu-latest
+            ccache: 'true'
           - target: common
             runs-on: ubuntu-latest
+            ccache: 'true'
           - target: legacy
             runs-on: ubuntu-latest
+            ccache: 'true'
           - target: aarch64
             runs-on: ubuntu-24.04-arm
+            ccache: 'true'
           - target: steamdeck-pgo
             runs-on: ubuntu-latest
+            ccache: 'flase'
           - target: rog-pgo
             runs-on: ubuntu-latest
+            ccache: 'flase'
           - target: common-pgo
             runs-on: ubuntu-latest
+            ccache: 'flase'
           - target: legacy-pgo
             runs-on: ubuntu-latest
+            ccache: 'flase'
           - target: aarch64-pgo
             runs-on: ubuntu-24.04-arm
+            ccache: 'flase'
     continue-on-error: true
     container: ghcr.io/pkgforge-dev/archlinux:latest
     name: "Appimage (${{ matrix.target }})"
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: time_macros
     steps:
       - uses: actions/checkout@v5.0.0
         with:
@@ -110,15 +124,32 @@ jobs:
         run: |
           chmod +x ./linux-dependencies.sh
           ./linux-dependencies.sh
-
+          
       - name: Clone Eden
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
+
+      - name: Restore ccache for ${{ matrix.target }}
+        if: ${{ matrix.ccache == 'true'}}
+        uses: actions/cache/restore@v4
+        id: restore-ccache-appimage
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ matrix.target }}-
 
       - name: Compile Eden ${{ matrix.target }}
         run: |
           chmod +x ./eden-appimage.sh
           ./eden-appimage.sh ${{ matrix.target }}
+
+      - name: Save ccache for ${{ matrix.target }}
+        if: ${{ matrix.ccache == 'true' && github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.restore-ccache-appimage.outputs.cache-primary-key }}
 
       - name: Upload appimage
         uses: actions/upload-artifact@v4.6.2
@@ -142,22 +173,42 @@ jobs:
     name: "Android (${{ matrix.target }})"
     env:
       TARGET: ${{ matrix.target }}
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: time_macros
     steps:
       - uses: actions/checkout@v5.0.0
 
       - name: Install dependencies
         run: |
+          sudo rm /var/lib/man-db/auto-update
           sudo apt-get update -y
-          sudo apt-get install glslang-tools libvulkan-dev python3-requests -y
+          sudo apt-get install ccache glslang-tools libvulkan-dev python3-requests -y
 
       - name: Clone Eden
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
+      - name: Restore ccache for ${{ matrix.target }}
+        uses: actions/cache/restore@v4
+        id: restore-ccache-cache
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-android-ccache-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-android-ccache-${{ matrix.target }}-
+
       - name: Compile Eden android
         run: |
           chmod +x ./eden-android.sh
           ./eden-android.sh
+
+      - name: Save ccache for ${{ matrix.target }}
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.restore-ccache-cache.outputs.cache-primary-key }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4.6.2
@@ -201,6 +252,9 @@ jobs:
       TOOLCHAIN: ${{ matrix.toolchain }}
       ARCH: ${{ matrix.arch }}
       TARGET: ${{ matrix.target }}
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: time_macros
     steps:
       - uses: actions/checkout@v5.0.0
 
@@ -212,15 +266,22 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4.3.0
         with:
-          version: '6.9.1'
+          version: '6.9.3'
+          cache: 'true'
 
       - name: Install vulkan-sdk
         shell: powershell
         run: |
           ./install-vulkan-sdk.ps1
-
+          
+      - name: install ccache
+        if: ${{ matrix.target == 'normal' }}
+        shell: bash
+        run: |
+          choco install ccache -y --no-progress
+          
       - name: Force Clang 20
-        if: matrix.toolchain == 'clang'
+        if: ${{ matrix.toolchain == 'clang' }}
         shell: bash
         run: |
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
@@ -231,6 +292,16 @@ jobs:
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
           cd ./eden
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
+
+      - name: Restore ccache
+        if: ${{ matrix.target == 'normal' }}
+        uses: actions/cache/restore@v4
+        id: restore-ccache-windows
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-
 
       - name: Compile Eden Windows
         shell: bash
@@ -247,6 +318,13 @@ jobs:
           makensis /DPRODUCT_TOOLCHAIN=%TOOLCHAIN% /DPRODUCT_VARIANT=%ARCH% /DPRODUCT_VERSION=%VERSION% eden.nsi
           mkdir artifacts 2>nul
           move /y *.exe artifacts\
+
+      - name: Save ccache
+        if: ${{ matrix.target == 'normal' && github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.restore-ccache-windows.outputs.cache-primary-key }}
 
       - name: Upload Eden 7z
         uses: actions/upload-artifact@v4.6.2
@@ -327,6 +405,8 @@ jobs:
     continue-on-error: true
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: time_macros
       TARGET: ${{ matrix.target }}
     steps:
       - name: Checkout repository
@@ -335,6 +415,16 @@ jobs:
       - name: Clone Eden
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
+
+      - name: Restore ccache
+        if: ${{ matrix.target == 'FreeBSD' }}
+        uses: actions/cache/restore@v4
+        id: restore-ccache-freebsd
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-${{ matrix.target }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-ccache-
 
       - name: Compile Eden FreeBSD
         uses: vmactions/freebsd-vm@v1.2.4
@@ -345,6 +435,13 @@ jobs:
             chmod +x ./freeBSD-dependencies.sh ./eden-freeBSD.sh
             ./freeBSD-dependencies.sh
             ./eden-freeBSD.sh
+
+      - name: Save ccache
+        if: ${{ matrix.target == 'FreeBSD' && github.ref_name == 'main' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.restore-ccache-freebsd.outputs.cache-primary-key }}
 
       - name: Upload
         uses: actions/upload-artifact@v4.6.2
