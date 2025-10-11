@@ -108,7 +108,6 @@ jobs:
           - target: aarch64-pgo
             runs-on: ubuntu-24.04-arm
             ccache: 'flase'
-    continue-on-error: true
     container: ghcr.io/pkgforge-dev/archlinux:latest
     name: "Appimage (${{ matrix.target }})"
     env:
